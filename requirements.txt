@@ -3,3 +3,4 @@ huggingface_hub
 tokenizers
 pandas
 scikit-learn
+requests
