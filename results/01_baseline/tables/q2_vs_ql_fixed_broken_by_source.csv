@@ -1,0 +1,9 @@
+﻿source,inj_fixed,inj_broken,ben_fixed,ben_broken,borderline,net
+AgentDojo,1,0,0,0,0,1
+BrowseSafe-Bench,0,3,9,0,2,6
+InjecAgent,3,5,0,0,3,-2
+LLMail-Inject,22,0,0,0,0,22
+BIPIA,20,3,0,0,6,17
+SEP,1,0,0,0,1,1
+Enron,0,0,0,0,0,0
+Synthetic,0,0,1,0,1,1
