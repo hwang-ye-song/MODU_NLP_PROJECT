@@ -4,6 +4,7 @@
 자연어처리(중급) 1기 Project 1 (2인).
 
 - 기준 문서 (문제, 선행 연구, 데이터 구성, 결정 기록, 일정): [docs/PROJECT.md](docs/PROJECT.md)
+- 진행 계획과 담당 (작업 전에 먼저 확인): [docs/PLAN.md](docs/PLAN.md)
 - 판정기: 공식 Jev API `jev-1.14.0` (요청당 최대 64k 토큰). 비교용으로 [OpenJevX](https://huggingface.co/muthuishere/openjevx) (입력 최대 512토큰)를 `backend="open"`으로 쓸 수 있습니다.
 
 ## 구조
