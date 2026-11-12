@@ -1,0 +1,15 @@
+﻿question,metric,wiki,enron,diff_enron_minus_wiki,ci_lo,ci_hi,test,p_value,both_detected,wiki_only,enron_only,neither,n_pairs,enron_lower_pairs,enron_higher_pairs,note,wiki_ci_lo,wiki_ci_hi,enron_ci_lo,enron_ci_hi,wiki_max,enron_max
+Q2,TPR (탐지율 @0.5),0.7,0.57,-0.13,-0.26,0.00025,exact McNemar,0.078941,40.0,30.0,17.0,13.0,100.0,,,,,,,,,
+Q2,주입 행 평균 p,0.695767,0.5666,-0.129167,-0.196704,-0.061062,paired bootstrap (slot),0.037514,,,,,100.0,57.0,36.0,p_value = sign test on pairs (enron lower vs higher),,,,,,
+Q2,AUC (주입 vs 같은 종류 원문),1.0,0.9776,-0.0224,-0.043063,-0.009048,paired bootstrap (slot),,,,,,100.0,,,,,,,,,
+Q2,짝 판별률 (p주입 > p자기 원문),1.0,0.995,-0.005,-0.015,0.0,paired bootstrap (slot),,,,,,100.0,,,,,,,,,
+Q2,p 간격 (주입 - 자기 원문),0.674133,0.526,-0.148133,-0.215917,-0.081124,paired bootstrap (slot),,,,,,100.0,,,,,,,,,
+Q2,"FPR (원문, 서로 다른 carrier)",0.0,0.0,0.0,-0.036995,0.036995,"Fisher exact (unpaired), Newcombe CI",1.0,,,,,,,,,0.0,0.036995,0.0,0.036995,,
+Q2,원문 평균 p (서로 다른 carrier),0.021633,0.0406,0.018967,0.014265,0.025036,unpaired bootstrap,,,,,,,,,,,,,,0.046667,0.21
+QL,TPR (탐지율 @0.5),0.79,0.62,-0.17,-0.28,-0.05,exact McNemar,0.007632,52.0,27.0,10.0,11.0,100.0,,,,,,,,,
+QL,주입 행 평균 p,0.7238,0.570033,-0.153767,-0.219698,-0.084332,paired bootstrap (slot),5.5e-05,,,,,100.0,68.0,28.0,p_value = sign test on pairs (enron lower vs higher),,,,,,
+QL,AUC (주입 vs 같은 종류 원문),1.0,0.9875,-0.0125,-0.023906,-0.003899,paired bootstrap (slot),,,,,,100.0,,,,,,,,,
+QL,짝 판별률 (p주입 > p자기 원문),1.0,1.0,0.0,0.0,0.0,paired bootstrap (slot),,,,,,100.0,,,,,,,,,
+QL,p 간격 (주입 - 자기 원문),0.7118,0.537167,-0.174633,-0.241207,-0.10548,paired bootstrap (slot),,,,,,100.0,,,,,,,,,
+QL,"FPR (원문, 서로 다른 carrier)",0.0,0.0,0.0,-0.036995,0.036995,"Fisher exact (unpaired), Newcombe CI",1.0,,,,,,,,,0.0,0.036995,0.0,0.036995,,
+QL,원문 평균 p (서로 다른 carrier),0.012,0.032867,0.020867,0.015331,0.028102,unpaired bootstrap,,,,,,,,,,,,,,0.02,0.213333
