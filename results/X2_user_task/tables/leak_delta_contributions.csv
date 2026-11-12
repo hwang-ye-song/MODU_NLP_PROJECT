@@ -1,0 +1,7 @@
+﻿question,user_task_source,contrib_dTPR,contrib_dFPR,net_new_detections,net_new_false_alarms
+Q2,benchmark,0.156,0.002,78,1
+Q2,scenario,0.016,0.0,8,0
+Q2,generic,-0.006,-0.006,-3,-3
+QL,benchmark,0.15,0.002,75,1
+QL,scenario,0.016,0.0,8,0
+QL,generic,0.0,0.0,0,0
