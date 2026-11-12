@@ -1,19 +1,19 @@
 # 간접 프롬프트 인젝션 가드레일 강건성
 
-판정 전용 모델 OpenJevX를 문서 속 숨은 인젝션을 거르는 가드레일로 쓰고, 길이 · 한국어 · 판정기 공격 조건에서 얼마나 버티는지 측정합니다.
+판정 전용 모델 Jev(공식 API `jev-1.14.0`)를 문서 속 숨은 인젝션을 거르는 가드레일로 쓰고, 길이 · 한국어 · 판정기 공격 조건에서 얼마나 버티는지 측정합니다.
 자연어처리(중급) 1기 Project 1 (2인).
 
-- 팀 문서 (결정 기록, 데이터 구성, 일정): https://claude.ai/artifact/V45mZncHY2RQXPmbdDHcz8
-- 판정기: [OpenJevX](https://huggingface.co/muthuishere/openjevx) (입력 최대 512토큰)
+- 기준 문서 (문제, 선행 연구, 데이터 구성, 결정 기록, 일정): [docs/PROJECT.md](docs/PROJECT.md)
+- 판정기: 공식 Jev API `jev-1.14.0` (요청당 최대 64k 토큰). 비교용으로 [OpenJevX](https://huggingface.co/muthuishere/openjevx) (입력 최대 512토큰)를 `backend="open"`으로 쓸 수 있습니다.
 
 ## 구조
 
 | 경로 | 내용 | 담당 |
 | --- | --- | --- |
 | `src/jev_guard.py` | 공통 `judge()`, `metrics()`, Jev 질문 문장 | 공통 |
-| `data/build_dataset.py` | 영어 평가셋 100건 생성 | 전반부 |
+| `data/build_dataset.py` | 영어 평가셋 약 600건 생성 | 전반부 |
 | `notebooks/01_baseline.ipynb` | ① 기준선 (출처별, 주입 위치별) | 전반부 |
-| `notebooks/02_length.ipynb` | ①-b 긴 문서 자르기 방식 비교 | 전반부 |
+| `notebooks/02_length.ipynb` | ①-b 긴 문서에 묻힌 인젝션 찾기 | 전반부 |
 | `notebooks/03_korean.ipynb` | ② 한국어 말투, 번역 후 판정 | 후반부 |
 | `notebooks/04_adaptive.ipynb` | ③ 적응형 공격 | 후반부 |
 | `notebooks/05_demo.ipynb` | ④ 요약 에이전트 + Jev 필터 데모 | 후반부 |
@@ -22,6 +22,7 @@
 ## 실행 (Colab, CPU)
 
 각 노트북 첫 셀이 레포를 clone하고 `onnxruntime`을 설치합니다.
+API 키는 Colab 왼쪽의 Secrets(열쇠 아이콘)에 `TYPESAFE_API_KEY`로 저장해 두면 첫 셀이 읽어 옵니다. 키를 코드나 노트북 출력, 커밋에 넣지 않습니다.
 
 ```python
 from src.jev_guard import judge, metrics
