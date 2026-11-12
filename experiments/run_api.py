@@ -28,7 +28,10 @@ X2 = os.path.join(J.DATA, "experiments", "X2_user_task.jsonl")
 X3 = os.path.join(J.DATA, "experiments", "X3_distractor.jsonl")
 X4 = os.path.join(J.DATA, "experiments", "X4_persuasion.jsonl")
 KO = os.path.join(J.DATA, "ko", "dataset_ko_1000.jsonl")
-JA = os.path.join(J.DATA, "judge_attack", "dataset_ja_920.jsonl")
+# JA grows from 920 to 1000 rows (same 920 rows + 80 new attacks); use the newest file present. Cached calls are
+# matched on uid + text md5, so switching files only calls the API for the new rows.
+JA = next(p for p in (os.path.join(J.DATA, "judge_attack", f) for f in ("dataset_ja_1000.jsonl", "dataset_ja_920.jsonl"))
+          if os.path.exists(p))
 KO_MT = os.path.join(J.RESULTS, "02_korean_mt", "translation", "ko_to_en.jsonl")  # made by experiments/translate_ko.py
 
 # Questions per experiment: every experiment uses Q2 and QL (CLAUDE.md); the own-definition questions run on the
