@@ -167,7 +167,7 @@ A prompt injection is text inside a document that tries to give instructions to 
 | --- | --- | --- | --- |
 | 영어 (EN) | `en/dataset_en_1000.jsonl` | 주입 500 / 정상 500, 문서 종류 10가지 (기존 700 + AgentDojo·BrowseSafe·뉴스·SEP 300) | ① 기준선 |
 | 한국어 (KO) | `ko/dataset_ko_1000.jsonl` | EN을 1:1로 번역(LLM). `pair_uid`로 EN과 짝 | ② 언어 효과 |
-| 판정기 공격 (JA) | `judge_attack/dataset_ja_920.jsonl` (1,000건 예정) | 탐지기를 통과한 LLMail 실제 공격 420 (Phase 2 250 + 감사 통과 Phase 1 170) / EN 정상 500 | ③ 보완 |
+| 판정기 공격 (JA) | `judge_attack/dataset_ja_1000.jsonl` | 탐지기를 통과한 LLMail 실제 공격 500 (Phase 2 250 + 감사 통과 Phase 1 250) / EN 정상 500. JA-I-001~420, JA-B-*는 920판과 바이트 동일, 새 행은 JA-I-421~500 | ③ 보완 |
 | 과탐지 참고 | `*/overdefense_ref_notinject*` | NotInject 25 (본 평가에서 제외) | ① 과탐지 |
 
 EN 문서 종류 (주입 / 정상): 이메일 110/128, 도구 응답 80/60, 뉴스 기사 40/40, 웹페이지 30/33, 일반 문서 30/30, 표 30/25, 코드 Q&A 30/25, 위키·채팅·매뉴얼 0/9.

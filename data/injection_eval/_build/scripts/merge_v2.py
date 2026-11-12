@@ -34,7 +34,7 @@ TARGET = {"injection": 500, "benign": 500}
 RESERVES = {"injection": ["llmail_injection_reserve"],
             "benign": ["enron_hardneg_reserve", "enron_reserve"]}
 # judge-attack candidate files, in order, with how many non-overlapping items to keep from each
-JA_FILES = [("ja_llmail_candidates.jsonl", 250), ("ja_llmail_phase1_candidates.jsonl", 250), ("ja_llmail_phase1_more.jsonl", 0)]
+JA_FILES = [("ja_llmail_candidates.jsonl", 250), ("ja_llmail_phase1_candidates.jsonl", 250), ("ja_llmail_phase1_more_a.jsonl", 40), ("ja_llmail_phase1_more_b.jsonl", 40), ("ja_llmail_phase1_more_c.jsonl", 0), ("ja_llmail_phase1_more_d.jsonl", 0)]
 JA_TARGET = 500
 REF_PARTS = ["notinject"]  # direct user prompts -> over-defense reference set, not in main eval
 ENRON_HN_KEEP = 25
