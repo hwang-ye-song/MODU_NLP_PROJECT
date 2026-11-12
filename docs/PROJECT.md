@@ -43,23 +43,23 @@ LLM 에이전트는 웹페이지, 메일, 문서를 읽다가 그 안에 숨은 
 
 ## 데이터 구성
 
-목표는 영어 약 600건(주입 300 / 정상 300)이다. 주입과 정상을 같은 출처에서 뽑아, 형식만 보고 맞히는 문제를 줄인다. BIPIA는 문맥 × 공격 × 위치 조합으로 합성한다. LLM으로 새 문장을 생성하는 합성은 하지 않는다.
+기준 데이터셋은 `data/injection_eval/`이다 (PR #2, 11/12). 출처, 버전, 열 설명, 알려진 한계는 [data/injection_eval/README.md](../data/injection_eval/README.md)에 있다.
 
-| 구분 | 출처 | 목표 개수 |
-| --- | --- | --- |
-| 주입 | [BIPIA](https://github.com/microsoft/BIPIA) email·table·code 문맥 × text/code 공격 × 위치 3종 (합성) | 150 |
-| 주입 | [LLMail-Inject](https://huggingface.co/datasets/microsoft/llmail-inject-challenge) `data/raw_submissions_phase2.jsonl` (중복 제거) | 75 |
-| 주입 | [InjecAgent](https://github.com/uiuc-kang-lab/InjecAgent) dh_base + ds_base의 Tool Response | 75 |
-| 정상 | BIPIA 원본 문맥 (일부는 주입 샘플과 같은 문서로 짝을 맞춤) | 100 |
-| 정상 | LLMail `emails_for_fp_tests.json` (203건 중) | 100 |
-| 정상 | InjecAgent 템플릿의 공격 자리에 정상 문장 삽입 | 50 |
-| 정상 | [NotInject](https://huggingface.co/datasets/leolee99/NotInject) 영어, 트리거 단어 2~3개 (과탐지 지표로 따로 보고) | 50 |
+| 조건 | 파일 | 구성 | 쓰는 단계 |
+| --- | --- | --- | --- |
+| 영어 (EN) | `en/dataset_en_700.jsonl` | 주입 350 / 정상 350, 문서 종류 7가지 | ① 기준선, ④ 데모 |
+| 한국어 (KO) | `ko/dataset_ko_700.jsonl` | EN을 1:1로 번역(LLM). `pair_uid`로 EN과 짝 | ② 언어 효과 |
+| 판정기 공격 (JA) | `judge_attack/dataset_ja_600.jsonl` | 탐지기를 통과한 LLMail 실제 공격 250 / EN 정상 350 | ③ 보완 |
+| 과탐지 참고 | `*/overdefense_ref_notinject*` | NotInject 25 (본 평가에서 제외) | ① 과탐지 |
 
-- 출력: `data/eval_en.jsonl`, 필드는 id, source, label(1=주입), position(start/middle/end 또는 null), text.
-- LLMail은 `load_dataset` 기본값이 약 1.9GB를 받으므로 `hf_hub_download`로 파일 하나만 받는다.
-- 정상·주입의 길이 분포를 비교해 출력한다. BIPIA 공격 문장은 125개뿐이라 공격 종류별로도 결과를 나눠 본다.
-- 지표는 임계값 0.5 기준 TPR·FPR과 AUC를 출처별로 낸다.
-- 한국어 데이터는 korean-prompt-injection-registers(1,768행, BSD-2/Apache-2.0)를 쓴다. KoPI-Bench는 비상업 라이선스이고 일부가 번역되지 않아 제외한다.
+EN 문서 종류 (주입 / 정상): 이메일 110/128, 도구 응답 80/60, 뉴스 기사 40/40, 웹페이지 30/33, 일반 문서 30/30, 표 30/25, 코드 Q&A 30/25, 위키·채팅·매뉴얼 0/9.
+
+- 주요 열: `uid`, `pair_uid`, `text`, `label_int`(1=주입), `doc_type`, `source`, `risk_level`(1~5), `injected_instruction`, `origin.position`(삽입 위치).
+- 길이만으로 라벨을 맞히는 AUC: EN 0.548, KO 0.564, JA 0.546. 결과 표에 비교 기준선으로 함께 적는다.
+- LLM이 쓴 텍스트: 합성 하드네거티브 15건(`source == "Synthetic"`), InjecAgent 정상 샘플의 빈칸 문장, KO 전체(번역). 필요하면 걸러서 따로 본다.
+- 지표는 임계값 0.5 기준 TPR·FPR과 AUC를 조건별, `doc_type`·`source`·`risk_level`·위치별로 낸다.
+- 말투 실험(②)에는 KO와 별도로 korean-prompt-injection-registers(1,768행, BSD-2/Apache-2.0)를 쓴다. KO는 **언어**의 영향을, registers는 **말투**의 영향을 잰다. KoPI-Bench는 비상업 라이선스이고 일부가 번역되지 않아 제외한다.
+- 확인 필요: Enron(AESLC) 메일의 라이선스가 데이터셋 카드에 "unknown"으로 표기되어 있다. 레포가 공개 상태이므로 그대로 둘지 정한다.
 
 ## Jev 사용 방식
 
@@ -128,13 +128,15 @@ LLM 에이전트는 웹페이지, 메일, 문서를 읽다가 그 안에 숨은 
 | 11/10 | skillsplit 팀 데이터는 쓰지 않음 | 별개 과제 |
 | 11/12 | 역할을 전반부·후반부로 나누지 않고 함께 한 단계씩 진행 | 두 사람이 옆에 앉아 같이 작업 중 |
 | 11/12 | `feat/jev-api`를 팀원 리뷰 전에 merge, 리뷰는 merge 뒤에 받음 | 팀원 부재. 다음 단계(데이터셋)가 이 브랜치에 의존 |
+| 11/12 | 기준 데이터셋을 `data/injection_eval/`(EN 700 / KO 700 / JA 600)로 정하고, 같은 시간에 따로 만든 영어 600건(`eval_en.jsonl`)은 쓰지 않음 | 두 사람이 같은 작업을 동시에 함. 700건 쪽이 문서 종류가 다양하고 한국어 짝과 판정기 공격 세트가 있어 ②·③에도 쓸 수 있음 |
+| 11/12 | `data/build_dataset.py` 삭제 | 데이터셋은 `data/injection_eval/_build/scripts/merge_v2.py`로 다시 만든다 |
+| 11/12 | PR #3(OpenJevX 긴 문서 실험)을 `experiments/`에 merge | 다른 파일에 영향이 없음. 판정 질문이 Q2가 아니고 최종 평가가 없어 ①-b의 비교 자료로만 씀 |
 
 ## 현재 상태와 다음 할 일 (11/12 기준)
 
 레포:
 
-- `main` (`0bb5b3d`): 뼈대. `src/jev_guard.py`, 노트북 5개(제목 + 설정 셀), README, requirements.
-- `feat/jev-api`: `5c337d9` 공식 API를 기본 판정기로, `909d938` 질문 문장 Q2 반영. 11/12 실제 API로 확인한 뒤 `main`에 merge했다.
+- `main`: PR #1(공식 API, 이 문서), PR #2(평가 데이터셋 `data/injection_eval/`), PR #3(OpenJevX 긴 문서 실험 `experiments/openjevx_long_input/`)이 merge되었다.
 
 `feat/jev-api`를 `main`에 합치기 전에 할 일:
 
@@ -146,7 +148,7 @@ LLM 에이전트는 웹페이지, 메일, 문서를 읽다가 그 안에 숨은 
 
 그다음:
 
-- [ ] 데이터셋 구축 (`data/build_dataset.py` → `data/eval_en.jsonl`)
+- [x] 데이터셋 구축 (`data/injection_eval/`, PR #2)
 - [ ] 공식 API로 Q2·Q3 재비교, 1건당 속도 측정
 - [ ] ④ 데모에 쓸 요약 LLM 정하기
 - [ ] 발표일 11/17 확인

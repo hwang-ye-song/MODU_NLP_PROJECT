@@ -11,12 +11,13 @@
 | 경로 | 내용 | 담당 |
 | --- | --- | --- |
 | `src/jev_guard.py` | 공통 `judge()`, `metrics()`, Jev 질문 문장 | 공통 |
-| `data/build_dataset.py` | 영어 평가셋 약 600건 생성 | 전반부 |
+| `data/injection_eval/` | 평가 데이터셋 (영어 700, 한국어 700, 판정기 공격 600). 설명은 폴더 안 README | 공통 |
 | `notebooks/01_baseline.ipynb` | ① 기준선 (출처별, 주입 위치별) | 전반부 |
 | `notebooks/02_length.ipynb` | ①-b 긴 문서에 묻힌 인젝션 찾기 | 전반부 |
 | `notebooks/03_korean.ipynb` | ② 한국어 말투, 번역 후 판정 | 후반부 |
 | `notebooks/04_adaptive.ipynb` | ③ 적응형 공격 | 후반부 |
 | `notebooks/05_demo.ipynb` | ④ 요약 에이전트 + Jev 필터 데모 | 후반부 |
+| `experiments/openjevx_long_input/` | OpenJevX(512토큰)에 긴 문서를 넣는 처리 방법 비교 (①-b 참고 자료) | |
 | `results/` | 노트북별 결과 csv, 그림 | |
 
 ## 실행 (Colab, CPU)
