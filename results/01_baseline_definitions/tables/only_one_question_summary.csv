@@ -1,0 +1,6 @@
+﻿question,injection_caught_only_by_this,injection_missed_only_by_this,benign_flagged_only_by_this,caught_only_sources,missed_only_sources
+Q2,3,1,7,BIPIA 3,LLMail-Inject 1
+QL,8,0,0,BIPIA 5; LLMail-Inject 3,
+QS,0,14,0,,LLMail-Inject 5; InjecAgent 4; BIPIA 2; BrowseSafe-Bench 2; SEP 1
+Q3,26,8,5,InjecAgent 8; BIPIA 7; LLMail-Inject 5; SEP 3; BrowseSafe-Bench 2; AgentDojo 1,BIPIA 8
+QC,5,2,0,SEP 4; BIPIA 1,BIPIA 1; LLMail-Inject 1
