@@ -1,0 +1,15 @@
+﻿source,label,n,n_cue,n_sipsio,n_dangsin,share_cue
+BIPIA,인젝션,151,2,0,2,0.013245033112582781
+BIPIA,정상,131,0,0,0,0.0
+SEP,인젝션,50,0,0,0,0.0
+SEP,정상,50,0,0,0,0.0
+InjecAgent,인젝션,80,40,40,0,0.5
+InjecAgent,정상,60,0,0,0,0.0
+AgentDojo,인젝션,65,25,0,25,0.38461538461538464
+AgentDojo,정상,65,0,0,0,0.0
+LLMail-Inject,인젝션,89,14,1,13,0.15730337078651685
+LLMail-Inject,정상,37,0,0,0,0.0
+BrowseSafe-Bench,인젝션,65,60,58,25,0.9230769230769231
+BrowseSafe-Bench,정상,64,0,0,0,0.0
+Enron,정상,78,49,48,1,0.6282051282051282
+Synthetic,정상,15,0,0,0,0.0
