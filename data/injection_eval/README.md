@@ -1,5 +1,11 @@
 # 간접 프롬프트 인젝션 가드레일 평가 데이터셋
 
+> **현재 상태 (2026-11-12, 1,000건 확장 1차)**
+> - `en/dataset_en_1000`: 영어 1,000건 (주입 500 / 정상 500). **라벨은 확정이라 베이스라인에 바로 쓸 수 있습니다.** 기존 700건에 AgentDojo 도구 출력 120, BrowseSafe 웹페이지 80, 뉴스 기사 60, SEP 40을 더했습니다. 기존 700건은 전수 라벨 감사를 거쳤고, 중복 21건을 같은 출처의 예비 샘플로 바꿨습니다(`_build/audit/overrides.json`). 기존 행의 uid는 그대로입니다.
+> - `judge_attack/dataset_ja_1000`: 탐지 우회 공격 500건(Phase 2 250 + **Phase 1 250, LLM Judge 레벨 우선**) + 영어 정상 500건.
+> - `ko/dataset_ko_879`: 한국어 번역 진행 중입니다. AgentDojo 120건과 보충 1건, 총 121건이 남았습니다. 끝나면 `dataset_ko_1000`으로 바뀝니다.
+> - **후속 작업**: AgentDojo 120건의 위험도 평가와 라벨 감사, JA Phase 1 250건의 위험도 3인 합의(지금은 수집 에이전트 1명의 판정), 아래 본문 통계 갱신. AgentDojo 주입 60건은 현재 `risk_level`이 비어 있습니다.
+
 이 데이터셋은 판정 전용 모델 Jev를 **문서 속에 숨은 인젝션을 걸러내는 앞단 필터**로 쓸 때, 아래 세 조건에서 얼마나 버티는지 측정하려고 만들었습니다. 기본 판정기는 공식 API `jev-1.14.0`(요청당 최대 64k 토큰)이고, 비교용으로 OpenJevX(약 0.4B, CPU, 입력 512토큰)를 씁니다.
 
 1. **EN**: 영어 문서
@@ -12,9 +18,9 @@
 
 | 경로 | 내용 | 행 수 |
 |---|---|---|
-| `en/dataset_en_700.{jsonl,csv}` | 영어 본 세트 | 700 (주입 350 / 정상 350) |
-| `ko/dataset_ko_700.{jsonl,csv}` | 한국어 본 세트. `pair_uid`로 영어와 1:1 연결 | 700 (주입 350 / 정상 350) |
-| `judge_attack/dataset_ja_600.{jsonl,csv}` | 판정기 공격 세트 | 600 (탐지 우회 공격 250 / 정상 350) |
+| `en/dataset_en_1000.{jsonl,csv}` | 영어 본 세트 | 700 (주입 350 / 정상 350) |
+| `ko/dataset_ko_879.{jsonl,csv}` | 한국어 본 세트. `pair_uid`로 영어와 1:1 연결 | 700 (주입 350 / 정상 350) |
+| `judge_attack/dataset_ja_1000.{jsonl,csv}` | 판정기 공격 세트 | 600 (탐지 우회 공격 250 / 정상 350) |
 | `en/overdefense_ref_notinject.*` / `ko/overdefense_ref_notinject_ko.*` | 과잉 차단 참고용. NotInject 사용자 프롬프트라 본 평가에서는 제외 | 25 / 25 |
 | `risk_rubric.md` | 위험도 1~5 기준표와 경계 사례 판정 규칙 | |
 | `_build/parts_v2/`, `_build/ko_parts/` | 출처별 영어 원본 조각과 한국어 번역 조각 | |

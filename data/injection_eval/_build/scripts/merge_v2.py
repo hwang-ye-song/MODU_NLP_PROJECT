@@ -1,4 +1,6 @@
-"""Build the final EN-700 / KO-700 / JA-600 datasets with risk levels + doc_type, and validate.
+"""Build the final EN / KO / JA datasets (1,000 rows each) with risk levels + doc_type, and validate.
+
+New part files are appended after the original ones so existing uids stay stable.
 
 Usage: python -X utf8 -I _build/scripts/merge_v2.py <dataset root> <unused>
 """
@@ -21,7 +23,18 @@ PART_PLAN = {
     "enron": (0, 40),
     "enron_hardneg": (0, 25),
     "hardneg": (0, 15),
+    # v3 expansion (appended so the 700-row uids above do not move)
+    "agentdojo_tools": (60, 60),
+    "webpage_more": (40, 40),
+    "bipia_abstract_more": (30, 30),
+    "sep_more": (20, 20),
 }
+TARGET = {"injection": 500, "benign": 500}
+# ranked reserve parts used, in order, to refill items removed by the label audit
+RESERVES = {"injection": ["llmail_injection_reserve"],
+            "benign": ["enron_hardneg_reserve", "enron_reserve"]}
+# judge-attack candidate files, in order, with how many non-overlapping items to keep from each
+JA_FILES = [("ja_llmail_candidates.jsonl", 250), ("ja_llmail_phase1_candidates.jsonl", 250)]
 REF_PARTS = ["notinject"]  # direct user prompts -> over-defense reference set, not in main eval
 ENRON_HN_KEEP = 25
 RISK_LABEL = {0: "정상", 1: "매우 낮음", 2: "낮음", 3: "중간", 4: "높음", 5: "매우 높음"}
@@ -43,6 +56,8 @@ problems = []
 
 
 def doc_type(r):
+    if r.get("doc_type") in DOC_KO:  # part files from v3 carry their own doc_type
+        return r["doc_type"]
     s, sub = r.get("source"), r.get("subset")
     if s == "BIPIA":
         return {"email": "email", "table": "table", "code": "code_qa", "abstract": "news_article"}.get(sub, sub)
@@ -138,20 +153,56 @@ def main(wd: Path, sp: Path):
         if p.exists():
             risk.update(json.loads(p.read_text(encoding="utf-8")))
 
+    # ---------- audit overrides ----------
+    # _build/audit/overrides.json: {"set": {id: {field: value}}, "drop": {id: reason}}
+    ov_path = wd / "_build" / "audit" / "overrides.json"
+    ov = json.loads(ov_path.read_text(encoding="utf-8")) if ov_path.exists() else {}
+    ov_set, ov_drop = ov.get("set", {}), ov.get("drop", {})
+
+    def apply_ov(rows):
+        out = []
+        for r in rows:
+            if r.get("id") in ov_drop:
+                continue
+            if r.get("id") in ov_set:
+                r = {**r, **ov_set[r["id"]]}
+            out.append(r)
+        return out
+
     # ---------- EN ----------
-    parts = {n: load(wd / "_build" / "parts_v2" / f"{n}.jsonl") for n in list(PART_PLAN) + REF_PARTS}
+    reserve_files = sorted({f for fs in RESERVES.values() for f in fs if f != "enron_hardneg_reserve"})
+    raw = {n: load(wd / "_build" / "parts_v2" / f"{n}.jsonl")
+           for n in list(PART_PLAN) + REF_PARTS + reserve_files}
+    parts = {n: apply_ov(v) for n, v in raw.items()}
     enron_texts = {r["text"].strip() for r in parts["enron"]}
-    parts["enron_hardneg"] = [r for r in parts["enron_hardneg"]
-                              if r["text"].strip() not in enron_texts][:ENRON_HN_KEEP]
+    hn_all = [r for r in parts["enron_hardneg"] if r["text"].strip() not in enron_texts]
+    parts["enron_hardneg"] = hn_all[:ENRON_HN_KEEP]
+    parts["enron_hardneg_reserve"] = hn_all[ENRON_HN_KEEP:]  # ranked leftovers, used only to refill
+    reserve_ids = {r["id"] for n in RESERVES["injection"] + RESERVES["benign"] for r in parts.get(n, [])}
     en = []
     for lab, prefix in (("injection", "EN-I"), ("benign", "EN-B")):
         i = 0
+        main_rows = []
         for n, (want_i, want_b) in PART_PLAN.items():
             rows = [r for r in parts[n] if r.get("label") == lab]
-            want = want_i if lab == "injection" else want_b
+            n_dropped = sum(1 for r in raw[n] if r.get("label") == lab and r.get("id") in ov_drop)
+            want = (want_i if lab == "injection" else want_b) - n_dropped
             if len(rows) != want:
                 problems.append(f"EN {n} {lab}: {len(rows)} != {want}")
-            for r in rows:
+            main_rows += rows
+        # refill what the audit dropped from ranked reserve files, so each label reaches its target
+        deficit = TARGET[lab] - len(main_rows)
+        for n in RESERVES[lab]:
+            if deficit <= 0:
+                break
+            take = [r for r in parts.get(n, []) if r.get("label") == lab][:deficit]
+            main_rows += [{**r, "notes": ((r.get("notes") or "") + " | audit refill").strip(" |")} for r in take]
+            deficit -= len(take)
+        if deficit > 0:
+            problems.append(f"EN {lab}: still {deficit} short of {TARGET[lab]} after reserves")
+        if deficit < 0:
+            problems.append(f"EN {lab}: {-deficit} over target {TARGET[lab]}")
+        for r in main_rows:
                 i += 1
                 r = dict(r)
                 r.update(uid=f"{prefix}-{i:03d}", pair_uid=None, lang="en", condition="EN",
@@ -197,7 +248,7 @@ def main(wd: Path, sp: Path):
     ko = []
     kdir = wd / "_build" / "ko_parts"
     for p in sorted(kdir.glob("*.jsonl")) if kdir.exists() else []:
-        ko += load(p)
+        ko += apply_ov(load(p))
     if ko:
         out, ko_ref = [], []
         seen = Counter(r.get("pair_id") for r in ko)
@@ -206,7 +257,8 @@ def main(wd: Path, sp: Path):
             pid = r.get("pair_id")
             e = by_id.get(pid) or ref_by_id.get(pid)
             if e is None:
-                if not str(pid).startswith("enron-hn-"):
+                # unused reserve items may already be translated; that is fine
+                if pid not in reserve_ids and pid not in ov_drop:
                     problems.append(f"KO orphan {pid}")
                 continue
             if r.get("label") != e["label"]:
@@ -215,6 +267,7 @@ def main(wd: Path, sp: Path):
             r.update(uid=e["uid"].replace("EN-", "KO-"), pair_uid=e["uid"], lang="ko",
                      condition="KO_REF" if pid in ref_by_id else "KO",
                      label=e["label"], label_int=e["label_int"], source=e["source"], subset=e["subset"],
+                     doc_type=e["doc_type"],
                      core=e["core"], risk_level=e["risk_level"], harm_type=e["harm_type"],
                      risk_rationale=e["risk_rationale"], technique=None, control=None, notes=e.get("notes"))
             if r.get("injected_instruction") and r["injected_instruction"] not in r["text"]:
@@ -236,22 +289,31 @@ def main(wd: Path, sp: Path):
 
     # ---------- JA ----------
     # 250 real detector-evading LLMail Phase2 attacks (public data, unpaired) + all EN benign unchanged
-    jp = wd / "_build" / "ja_llmail_candidates.jsonl"
-    if jp.exists():
-        cands = load(jp)
-        en_llmail_rows = {r["origin"].get("row_index") for r in en
+    if (wd / "_build" / JA_FILES[0][0]).exists():
+        en_llmail_rows = {(r["origin"].get("split", "Phase2"), r["origin"].get("row_index")) for r in en
                           if r["source"] == "LLMail-Inject" and r["label"] == "injection"}
-        en_texts = {r["text"].strip() for r in en}
+        seen_texts = {r["text"].strip() for r in en}
         keep, dropped = [], 0
-        for r in cands:
-            if r["origin"].get("row_index") in en_llmail_rows or r["text"].strip() in en_texts:
-                dropped += 1
+        for fname, n_keep in JA_FILES:
+            jp = wd / "_build" / fname
+            if not jp.exists():
+                problems.append(f"missing {fname}")
                 continue
-            keep.append(r)
-        if len(keep) < 250:
-            problems.append(f"JA only {len(keep)} non-overlapping candidates")
+            got = 0
+            for r in apply_ov(load(jp)):
+                if got >= n_keep:
+                    break
+                key = (r["origin"].get("split", "Phase2"), r["origin"].get("row_index"))
+                if key in en_llmail_rows or r["text"].strip() in seen_texts:
+                    dropped += 1
+                    continue
+                seen_texts.add(r["text"].strip())
+                keep.append(r)
+                got += 1
+            if got < n_keep:
+                problems.append(f"JA {fname}: only {got} non-overlapping candidates (< {n_keep})")
         out = []
-        for i, r in enumerate(keep[:250], 1):
+        for i, r in enumerate(keep, 1):
             r = dict(r)
             if r.get("injected_instruction") and r["injected_instruction"] not in r["text"]:
                 problems.append(f"JA {r['id']}: injected_instruction not in text")
@@ -273,8 +335,8 @@ def main(wd: Path, sp: Path):
         write(out, wd / "judge_attack" / f"dataset_ja_{len(out)}")
         summarize("JA", out)
         print(f"  candidates dropped for EN overlap: {dropped}")
-        print("  detector:", dict(Counter(r.get("detector") for r in keep[:250])))
-        print("  technique tags:", dict(Counter(t for r in keep[:250] for t in (r.get("technique_tags") or [])).most_common()))
+        print("  detector:", dict(Counter(r.get("detector") for r in keep)))
+        print("  technique tags:", dict(Counter(t for r in keep for t in (r.get("technique_tags") or [])).most_common()))
 
     print("\nPROBLEMS:" if problems else "\nOK: no problems")
     for p in problems[:80]:

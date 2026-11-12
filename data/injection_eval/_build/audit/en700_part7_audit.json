@@ -1,0 +1,602 @@
+[
+ {
+  "id": "llmail-ben-21",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-22",
+  "verdict": "drop",
+  "issue": "Near-duplicate of llmail-ben-02 (difflib 0.97, 5-gram Jaccard 0.66): identical text except project name Orion->Apollo.",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-23",
+  "verdict": "drop",
+  "issue": "Near-duplicate of llmail-ben-01 (difflib 0.92): same organizer template, only project name, date and signer differ.",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-24",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-25",
+  "verdict": "drop",
+  "issue": "Near-duplicate of llmail-ben-17 (difflib 0.89): same organizer template, only project, university, date and signer differ.",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-26",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-27",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-28",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-29",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-30",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-31",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-32",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-33",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-34",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-35",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-36",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-37",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-38",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-39",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "llmail-ben-40",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-01",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-02",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-03",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-04",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-05",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-06",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-07",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-08",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-09",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-10",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-11",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-12",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-13",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-14",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-15",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-16",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-17",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-18",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-19",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-20",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-21",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-22",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-23",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-24",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-25",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-26",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-27",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-28",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-29",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-30",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-31",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-32",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-33",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-34",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-35",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-36",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-37",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-38",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-39",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-ben-40",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-01",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-02",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-03",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-04",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-05",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-06",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-07",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-08",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-09",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-10",
+  "verdict": "ok",
+  "issue": "Benign (human-to-human \"ignore shipping instructions\"). Note: source itself ends at \"listed below (together with other information):\" because AESLC removed the address block; not our truncation; no PII present.",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-11",
+  "verdict": "ok",
+  "issue": "Benign IT request; mentions passwords but contains no actual password or credential.",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-12",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-13",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-14",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-15",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-16",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-17",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-18",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-19",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-20",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-21",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-22",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-23",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-24",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "enron-hn-25",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-01",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-02",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-03",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-04",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-05",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-06",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-07",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-08",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-09",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-10",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-11",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-12",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-13",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-14",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "hardneg-ben-15",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ }
+]
