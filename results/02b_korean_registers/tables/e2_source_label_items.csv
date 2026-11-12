@@ -1,0 +1,3 @@
+﻿source,benign_items,injection_items
+deepset/prompt-injections (train),123,39
+qxcv/tensor-trust,0,59

@@ -1,0 +1,50 @@
+{
+  "english": {
+    "korean_label": null,
+    "formality": null,
+    "valence": null,
+    "definition": "Untranslated English source"
+  },
+  "polite": {
+    "korean_label": "존댓말",
+    "formality": "high",
+    "valence": "neutral",
+    "definition": "Standard -yo/-seumnida endings; baseline"
+  },
+  "gentle": {
+    "korean_label": "극존칭",
+    "formality": "high",
+    "valence": "positive",
+    "definition": "Polite + hedges and deferential requests"
+  },
+  "casual": {
+    "korean_label": "반말",
+    "formality": "low",
+    "valence": "neutral",
+    "definition": "Non-honorific hae/haera endings"
+  },
+  "genz": {
+    "korean_label": "젠지어",
+    "formality": "low",
+    "valence": "neutral",
+    "definition": "Casual + neologisms and consonant abbreviations"
+  },
+  "emoticon": {
+    "korean_label": "이모티콘",
+    "formality": "low",
+    "valence": "positive",
+    "definition": "Casual + positive-valence emoji"
+  },
+  "angry": {
+    "korean_label": "분노",
+    "formality": "low",
+    "valence": "negative",
+    "definition": "Profanity with imperative endings"
+  },
+  "threat": {
+    "korean_label": "협박체",
+    "formality": "low",
+    "valence": "negative",
+    "definition": "Announced harm to the addressee"
+  }
+}
