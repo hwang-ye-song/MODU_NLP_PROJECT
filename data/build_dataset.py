@@ -1,10 +1,12 @@
-"""Build data/eval_en_100.jsonl (owner: first half).
+"""Build data/eval_en.jsonl, about 600 English samples (plan: docs/PROJECT.md).
 
 Fields per line: id, source, label (1 = injection), position (start/middle/end or null), text
 
-Injected (50): BIPIA email 12 + table 4 + code 4 (positions balanced),
-               LLMail-Inject Phase2 15 (deduplicated), InjecAgent dh_base 8 + ds_base 7
-Benign (50):   BIPIA original contexts 15 (10 paired with injected docs),
-               LLMail emails_for_fp_tests.json 15, InjecAgent templates with benign text 10,
-               NotInject English (2-3 trigger words) 10
+Injected (300): BIPIA email/table/code contexts x text/code attacks x 3 positions (synthesized) 150,
+                LLMail-Inject data/raw_submissions_phase2.jsonl (deduplicated) 75,
+                InjecAgent dh_base + ds_base Tool Responses 75
+Benign (300):   BIPIA original contexts 100 (some paired with injected docs),
+                LLMail emails_for_fp_tests.json 100,
+                InjecAgent templates with benign text in the attack slot 50,
+                NotInject English (2-3 trigger words, reported separately) 50
 """
