@@ -254,12 +254,20 @@ def raw_stats(exp, qid):
 
 
 def write_summary(exp, blocks, extra=None):
-    """blocks: {qid: {"overall": metric_block(...), ...anything}}; adds run metadata required by issue #9."""
+    """blocks: {qid: {"overall": metric_block(...), ...anything}}; adds run metadata required by issue #9.
+    Re-running keeps what the analysis script added ("analysis") and, when this invocation made no new API calls,
+    keeps the original date and commit (they describe when the calls were made, not when the script was re-run)."""
+    path = os.path.join(RESULTS, exp, "summary.json")
+    old = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
+    no_new_calls = all((b.get("this_invocation") or {}).get("calls_made", 1) == 0 for b in blocks.values())
     s = {"experiment": exp, "model": MODEL, "threshold": THRESHOLD, "repeats_per_sample": REPEATS,
          "p_definition": f"mean of {REPEATS} calls (API has no seed)",
-         "date": dt.date.today().isoformat(), "commit": git_commit(),
+         "date": old.get("date") if (no_new_calls and old.get("date")) else dt.date.today().isoformat(),
+         "commit": old.get("commit") if (no_new_calls and old.get("commit")) else git_commit(),
          "questions": {q: QUESTIONS[q] for q in blocks}}
     for qid, b in blocks.items():
+        if no_new_calls and (old.get(qid) or {}).get("this_invocation"):
+            b = {**b, "this_invocation": old[qid]["this_invocation"]}  # keep the timing of the run that made the calls
         st = raw_stats(exp, qid)
         if st["first_call"] and st["last_call"]:
             a = dt.datetime.fromisoformat(st["first_call"])
@@ -268,6 +276,8 @@ def write_summary(exp, blocks, extra=None):
         s[qid] = {**b, "run": st}
     if extra:
         s.update(extra)
-    with open(os.path.join(RESULTS, exp, "summary.json"), "w", encoding="utf-8") as f:
+    if "analysis" in old and "analysis" not in s:
+        s["analysis"] = old["analysis"]
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(s, f, ensure_ascii=False, indent=1, default=float)
     return s
