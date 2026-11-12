@@ -19,7 +19,7 @@
 | 자동화 | 실험 자동화 (데이터셋 → 일괄 판정 → 결과 csv) | 🔄 진행 중 | 예성 |
 | C | ① 기준선 | ✅ 완료 (`results/01_baseline/`, Q2·QL) | 예성 |
 | D | ①-b 길이 | ⏳ 참고 자료 있음: PR #3 `experiments/openjevx_long_input/` | 예성 |
-| E | ② 한국어 | ⏳ | 예성 |
+| E | ② 한국어 | 🔄 일부 완료: KO 1000 원문 + 번역 후 판정(`results/02_korean/`, `results/02_korean_mt/`). 남음: E2·E3·E5 말투 데이터(korean-prompt-injection-registers) | 예성 |
 | F | ③ 적응형 공격 | 🔄 일부 완료: 판정기 공격 JA 920(`results/03_judge_attack/`), 설득 문구(X4), 어조(X1). 남음: F4 점수 피드백 탐색, JA 1000 갱신 | 예성 |
 | X1 | 지시문 어조: 같은 공격을 명령형/평범한 요청/공손체로 (450건) | ✅ 완료 (`results/X1_register/`, Q2·QL) | 예성 |
 | X3 | 주변 글 종류: 같은 지시문을 위키 설명문 vs 요청이 많은 업무 메일에 (400건) | ✅ 완료 (`results/X3_distractor/`, Q2·QL) | 예성 |
