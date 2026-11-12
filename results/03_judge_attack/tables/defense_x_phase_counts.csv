@@ -1,9 +1,9 @@
 ﻿defense,Phase1,Phase2
-all(task_tracker_phi3+prompt_shield+llm_judge+spotlight),17,0
+all(task_tracker_phi3+prompt_shield+llm_judge+spotlight),19,0
 all(task_tracker_phi4+prompt_shield_v2+llm_judge),0,3
-llm_judge,38,19
-prompt_shield,54,0
+llm_judge,65,19
+prompt_shield,94,0
 prompt_shield_v2,0,142
 task_tracker_phi3.5_moe,0,19
-task_tracker_phi3_medium,61,54
+task_tracker_phi3_medium,72,54
 task_tracker_phi4,0,13

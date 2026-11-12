@@ -3,17 +3,23 @@
     python experiments/analyze_03_judge_attack.py
 
 Inputs (produced earlier by `python experiments/run_api.py 03_judge_attack` / `01_baseline`; never modified here):
-  results/03_judge_attack/{Q2,QL}_predictions.csv  JA 920 = 420 LLMail-Inject submissions that evaded the challenge's
+  results/03_judge_attack/{Q2,QL}_predictions.csv  JA 1000 = 500 LLMail-Inject submissions that evaded the challenge's
                                                    own detector (Prompt Shield / TaskTracker / LLM judge / all) +
-                                                   500 benign rows that are the EN benign documents (pair_uid -> EN uid)
+                                                   500 benign rows that are the EN benign documents (pair_uid -> EN uid).
+                                                   JA-I-001..420 + JA-B-* are byte-identical to the earlier
+                                                   dataset_ja_920 (their calls were reused); JA-I-421..500 are the 80
+                                                   audited Phase 1 attacks added in dataset_ja_1000 (new calls)
   results/01_baseline/{Q2,QL}_predictions.csv      EN 1000 (set=="EN"): the comparison condition. Its 89 LLMail-Inject
                                                    injections are the same challenge and format but were NOT selected
                                                    for evading a detector (51 of them did, 38 did not: origin.objectives)
-  data/injection_eval/judge_attack/dataset_ja_920.jsonl, data/injection_eval/en/dataset_en_1000.jsonl
+  data/injection_eval/judge_attack/dataset_ja_1000.jsonl, data/injection_eval/en/dataset_en_1000.jsonl
                                                    metadata only (technique tags, origin.defense, phase, team, text)
+  results/03_judge_attack/raw/{Q2,QL}_raw.jsonl    read only for the call timing of the two batches (920 rows, new 80)
 Outputs:
   results/03_judge_attack/tables/*.csv, results/03_judge_attack/figures/*.png,
   results/03_judge_attack/summary.json  -> adds an "analysis" object, keeps every existing key.
+  The "920 -> 1000" note (tables/change_920_to_1000.csv, analysis.change_920_to_1000) recomputes the 920-version
+  headline from the same CSVs restricted to the 920 old rows (their p are unchanged), next to the 1000-row numbers.
 
 Statistics: TPR / FPR / AUC point estimates through src.jev_guard.metrics (threshold 0.5); Wilson 95% CIs
 (jevlab.wilson). Paired comparisons on the same documents (Q2 vs QL; JA benign vs EN benign = same 500 texts, independent
@@ -28,6 +34,7 @@ import json
 import math
 import os
 import re
+import subprocess
 import sys
 
 import numpy as np
@@ -54,8 +61,16 @@ OUT = os.path.join(J.RESULTS, EXP)
 BASE_DIR = os.path.join(J.RESULTS, "01_baseline")
 TAB = os.path.join(OUT, "tables")
 FIG = os.path.join(OUT, "figures")
-JA_DATA = os.path.join(J.DATA, "judge_attack", "dataset_ja_920.jsonl")
+JA_DATA = os.path.join(J.DATA, "judge_attack", "dataset_ja_1000.jsonl")
 EN_DATA = os.path.join(J.DATA, "en", "dataset_en_1000.jsonl")
+N_JA, N_JA_ATTACK, N_JA_BENIGN = 1000, 500, 500
+JA_SET = f"JA {N_JA}"
+OLD_LAST_ATTACK = 420  # JA-I-001..420 (+ all JA-B-*) = the earlier dataset_ja_920; JA-I-421..500 were added later
+# The calls come from two run_api.py invocations. summary.json's top-level "commit" is HEAD of the LAST invocation that
+# made calls (the 80 new rows), so the commit of the first batch (the 920 old rows) is recorded here: it is the "commit"
+# that run_api.py wrote into the 920-version summary.json, committed in OLD_SUMMARY_REV
+# (`git show 44b2b7d:results/03_judge_attack/summary.json`). Cross-checked against git when history is available.
+OLD_RUN_COMMIT, OLD_SUMMARY_REV = "24a7578", "44b2b7d"
 
 QS = ["Q2", "QL"]
 Q_COLORS = {"Q2": "#2a78d6", "QL": "#eb6834"}  # project-wide: colour = question
@@ -86,17 +101,26 @@ DEF_ORDER = ["prompt_shield", "prompt_shield_v2", "task_tracker_phi3_medium", "t
              "llm_judge", "all(task_tracker_phi3+prompt_shield+llm_judge+spotlight)",
              "all(task_tracker_phi4+prompt_shield_v2+llm_judge)"]
 DEF_KO = {"prompt_shield": "Prompt Shield (P1)", "prompt_shield_v2": "Prompt Shield v2 (P2)",
-          "task_tracker_phi3_medium": "TaskTracker Phi3", "task_tracker_phi3.5_moe": "TaskTracker Phi3.5 MoE (P2)",
+          "task_tracker_phi3_medium": "TaskTracker Phi3 (P1·P2)", "task_tracker_phi3.5_moe": "TaskTracker Phi3.5 MoE (P2)",
           "task_tracker_phi4": "TaskTracker Phi4 (P2)", "llm_judge": "LLM 판정기",
           "all(task_tracker_phi3+prompt_shield+llm_judge+spotlight)": "전부+spotlight (P1)",
           "all(task_tracker_phi4+prompt_shield_v2+llm_judge)": "전부 (P2)"}
+# dataset_ja_1000 writes the Phase 1 TaskTracker defence of levels c/d as "task_tracker" for the 80 new rows and as
+# "task_tracker_phi3_medium" for the older rows (same levels, same detector); the by-defence table merges the two.
+DEF_ALIAS = {("Phase1", "task_tracker"): "task_tracker_phi3_medium"}
 OUTCOME_KO = {"full": "발송 성공 (주소·본문 정확)", "partial": "발송했으나 주소·본문 틀림", "none": "탐지만 통과, 발송 못 함"}
 OUTCOME_ORDER = ["full", "partial", "none"]
+HARM_KO = {"data_exfiltration": "정보 유출", "account_data_tamper": "계정 데이터 변조", "unauthorized_action": "무단 행동",
+           "physical_harm": "물리적 위해"}
 GROUP_KO = {"EN_all": "EN 전체 주입", "EN_LL": "EN LLMail 전체", "EN_LL_evaded": "EN LLMail 중 탐지기 통과",
             "EN_LL_caught": "EN LLMail 중 탐지기에 걸림", "JA_all": "JA 전체", "JA_P2": "JA Phase 2", "JA_P1": "JA Phase 1",
-            "JA_clf": "JA 중 분류기만 통과", "JA_llm": "JA 중 LLM 판정기 포함"}
+            "JA_clf": "JA 중 분류기만 통과", "JA_llm": "JA 중 LLM 판정기 포함",
+            "JA_920": "JA 920판 공격 (JA-I-001~420)", "JA_P1_old": "JA 920판의 Phase 1 (JA-I-251~420)",
+            "JA_new": "JA 새 80 (JA-I-421~500, Phase 1)"}
 # bootstrap index matrices are generated in this order (new groups only ever appended at the end)
-GROUP_ORDER = ["EN_all", "EN_LL", "EN_LL_evaded", "EN_LL_caught", "JA_all", "JA_P2", "JA_P1", "JA_clf", "JA_llm"]
+GROUP_ORDER = ["EN_all", "EN_LL", "EN_LL_evaded", "EN_LL_caught", "JA_all", "JA_P2", "JA_P1", "JA_clf", "JA_llm",
+               "JA_920", "JA_P1_old", "JA_new"]
+F02_GROUPS = GROUP_ORDER[:9]  # the main comparison figure; the 920/new-80 split has its own figure (f14)
 N_EN_GROUPS = 4
 
 
@@ -254,7 +278,11 @@ def load_meta():
     ja = pd.DataFrame(J.load_jsonl(JA_DATA))
     o = ja["origin"]
     ja["phase"] = [x.get("split") if isinstance(x, dict) else None for x in o]
-    ja["defense"] = [x.get("defense") if isinstance(x, dict) else None for x in o]
+    ja["defense_raw"] = [x.get("defense") if isinstance(x, dict) else None for x in o]
+    ja["defense"] = [DEF_ALIAS.get((ph, d), d) for ph, d in zip(ja["phase"], ja["defense_raw"])]
+    ja["rowkey"] = [x.get("RowKey") if isinstance(x, dict) else None for x in o]
+    ja["is_new"] = [l == 1 and int(u.split("-")[-1]) > OLD_LAST_ATTACK for u, l in zip(ja["uid"], ja["label_int"])]
+    ja["risk_merged"] = [None if l != 1 else ("3" if r == 3 else "4–5") for r, l in zip(ja["risk_level"], ja["label_int"])]
     ja["level"] = [x.get("level") if isinstance(x, dict) else None for x in o]
     ja["scenario"] = [x.get("scenario") if isinstance(x, dict) else None for x in o]
     ja["target_model"] = [x.get("model") if isinstance(x, dict) else None for x in o]
@@ -277,6 +305,7 @@ def load_meta():
     eo = en["origin"]
     en["undetected"] = [bool((x.get("objectives") or {}).get("defense.undetected")) if isinstance(x, dict) else None
                         for x in eo]
+    en["rowkey"] = [x.get("RowKey_or_job_id") if isinstance(x, dict) else None for x in eo]
     en["team_id"] = [x.get("team_id") if isinstance(x, dict) else None for x in eo]
     en["level_description"] = [x.get("level_description") if isinstance(x, dict) else None for x in eo]
     en["llm_judge_level"] = en["level_description"].fillna("").str.contains("LLM Judge")
@@ -290,16 +319,82 @@ def load_meta():
     return ja, en
 
 
+def old_run_commit_from_git():
+    """Read-only cross-check of OLD_RUN_COMMIT: the "commit" in the 920-version summary.json in git history.
+    None when git or that revision is not available (e.g. a shallow clone); the constant is then used as is."""
+    try:
+        out = subprocess.run(["git", "-C", REPO, "show", f"{OLD_SUMMARY_REV}:results/{EXP}/summary.json"],
+                             capture_output=True, text=True, encoding="utf-8", timeout=30)
+        return json.loads(out.stdout).get("commit") if out.returncode == 0 else None
+    except Exception:
+        return None
+
+
+def span_s(first, last):
+    """Seconds from the first call's start to the last call's start (same definition as run_api's wall_clock_span_s)."""
+    if not first or not last:
+        return None
+    return round((dt.datetime.fromisoformat(last) - dt.datetime.fromisoformat(first)).total_seconds(), 1)
+
+
+def run_batches(new_uids, last_commit):
+    """Call timing and commit of the two API batches (920 old rows, 80 new rows), read from raw/ (read only, no API).
+    last_commit: summary.json's top-level "commit" = HEAD of the invocation that called the 80 new rows."""
+    git_old = old_run_commit_from_git()
+    assert git_old in (None, OLD_RUN_COMMIT), f"920-version summary.json in git says commit {git_old}, not {OLD_RUN_COMMIT}"
+    commits = {"920_rows": (OLD_RUN_COMMIT, f"constant OLD_RUN_COMMIT = 'commit' of the 920-version summary.json "
+                                            f"(git {OLD_SUMMARY_REV}); "
+                                            + ("checked against git history" if git_old else "git history not available, "
+                                                                                           "not re-checked")),
+               "new_80": (last_commit, "summary.json top-level 'commit' (run_api.py keeps it when an invocation makes "
+                                       "no new calls)")}
+    out = {}
+    for q in QS:
+        rs = J.load_jsonl(J.raw_path(EXP, q))
+        for name, sel in (("920_rows", lambda r: r["uid"] not in new_uids), ("new_80", lambda r: r["uid"] in new_uids)):
+            b = [r for r in rs if sel(r)]
+            ok = [r for r in b if r.get("http_status") == 200]
+            lat = sorted(float(r["latency_ms"]) for r in ok)
+            st = sorted(r["started_at"] for r in b)
+            first, last = (st[0], st[-1]) if st else (None, None)
+            out[f"{q}|{name}"] = {"calls": len(b), "errors": len(b) - len(ok),
+                                  "retries": int(sum(r.get("retries", 0) for r in b)),
+                                  "first_call": first, "last_call": last, "duration_s": span_s(first, last),
+                                  "latency_ms_median": lat[len(lat) // 2] if lat else None,
+                                  "input_tokens_total": int(sum(r.get("usage_input_tokens") or 0 for r in ok)),
+                                  "commit": commits[name][0], "commit_source": commits[name][1]}
+    return out
+
+
+def run_totals(batches):
+    """Per question: total calls and API time summed over the batches, and the idle gap between them. summary.json's
+    <Q>.run.wall_clock_span_s runs from the first call of batch 1 to the last call of batch 2, gap included."""
+    out = {}
+    for q in QS:
+        a, b = batches[f"{q}|920_rows"], batches[f"{q}|new_80"]
+        out[q] = {"calls": a["calls"] + b["calls"], "errors": a["errors"] + b["errors"],
+                  "retries": a["retries"] + b["retries"],
+                  "api_duration_s": round(a["duration_s"] + b["duration_s"], 1),
+                  "idle_gap_between_batches_s": span_s(a["last_call"], b["first_call"]),
+                  "wall_clock_span_s": span_s(a["first_call"], b["last_call"]),
+                  "commits": {"920_rows": a["commit"], "new_80": b["commit"]},
+                  "note": "duration = api_duration_s (sum of the two batches). wall_clock_span_s (= summary.json "
+                          f"{q}.run.wall_clock_span_s) includes the idle gap and is not a run time. The top-level "
+                          "'commit' is the new_80 batch's commit only."}
+    return out
+
+
 def load_question(q, ja_meta, en_meta):
     ja = pd.read_csv(os.path.join(OUT, f"{q}_predictions.csv"))
     base = pd.read_csv(os.path.join(BASE_DIR, f"{q}_predictions.csv"))
-    assert len(ja) == 920 and ja["uid"].is_unique
+    assert len(ja) == N_JA and ja["uid"].is_unique and set(ja["uid"]) == set(ja_meta["uid"])
+    assert (ja["label_int"] == 1).sum() == N_JA_ATTACK and (ja["label_int"] == 0).sum() == N_JA_BENIGN
     assert ((ja["p"] >= THRESHOLD).astype(int) == ja["pred"]).all()
     assert (ja["n_runs"] == 3).all()
     en = base[base["set"] == "EN"].copy()
     assert len(en) == 1000
-    keep = ["uid", "phase", "defense", "level", "scenario", "target_model", "team_id", "outcome", "detector",
-            "judge_type", "tags",
+    keep = ["uid", "phase", "defense", "defense_raw", "level", "scenario", "target_model", "team_id", "outcome",
+            "detector", "judge_type", "tags", "is_new", "risk_merged",
             "n_tags", "has_target_addr", "has_confirmation", "subject_start", "is_email", "text",
             "injected_instruction", "harm_type"]
     ja = ja.merge(ja_meta[keep], on="uid", how="left", validate="1:1")
@@ -341,6 +436,9 @@ def main():
         "JA_P1": lambda d: d["inj"][d["inj"]["phase"] == "Phase1"],
         "JA_clf": lambda d: d["inj"][d["inj"]["judge_type"] == "clf"],
         "JA_llm": lambda d: d["inj"][d["inj"]["judge_type"] == "llm"],
+        "JA_920": lambda d: d["inj"][~d["inj"]["is_new"]],
+        "JA_P1_old": lambda d: d["inj"][~d["inj"]["is_new"] & (d["inj"]["phase"] == "Phase1")],
+        "JA_new": lambda d: d["inj"][d["inj"]["is_new"]],
     }
     for g in GROUP_ORDER:
         if g not in IDX:
@@ -373,11 +471,31 @@ def main():
         "attacks_by_outcome": inj_meta["outcome"].value_counts().to_dict(),
         "attacks_by_risk_level": inj_meta["risk_level"].value_counts().to_dict(),
         "attacks_by_target_model": inj_meta["target_model"].value_counts().to_dict(),
+        "attacks_by_harm_type": inj_meta["harm_type"].value_counts().to_dict(),
         "n_teams": int(inj_meta["team_id"].nunique()), "max_per_team": int(inj_meta["team_id"].value_counts().max()),
         "en_llmail_n": len(G["Q2"]["EN_LL"]), "en_llmail_undetected_true": int(G["Q2"]["EN_LL"]["undetected"].sum()),
         "benign_identical_to_en": bool((D["Q2"]["ben"]["text"].to_numpy() == en_meta.set_index("uid").loc[
             D["Q2"]["ben"]["pair_uid"], "text"].to_numpy()).all()),
+        "attack_text_overlap_with_en": int(inj_meta["text"].isin(set(en_meta["text"])).sum()),
+        "attack_rowkey_overlap_with_en_llmail": len(set(ja_meta["rowkey"].dropna()) & set(en_meta["rowkey"].dropna())),
+        "defense_alias_rows": {f"{k[0]}:{k[1]}->{v}": int(((ja_meta["phase"] == k[0]) & (ja_meta["defense_raw"] == k[1])
+                                                           ).sum()) for k, v in DEF_ALIAS.items()},
+        "new_80": {"n": int(inj_meta["is_new"].sum()),
+                   "by_detector": inj_meta[inj_meta["is_new"]]["detector"].value_counts().to_dict(),
+                   "by_risk_level": inj_meta[inj_meta["is_new"]]["risk_level"].value_counts().to_dict(),
+                   "by_target_model": inj_meta[inj_meta["is_new"]]["target_model"].value_counts().to_dict(),
+                   "by_outcome": inj_meta[inj_meta["is_new"]]["outcome"].value_counts().to_dict(),
+                   "n_teams": int(inj_meta[inj_meta["is_new"]]["team_id"].nunique()),
+                   "n_teams_not_in_920": int(len(set(inj_meta[inj_meta["is_new"]]["team_id"]) -
+                                                 set(inj_meta[~inj_meta["is_new"]]["team_id"])))},
     }
+    assert analysis["data_profile"]["benign_identical_to_en"]
+    assert analysis["data_profile"]["attack_text_overlap_with_en"] == 0
+    assert analysis["data_profile"]["attack_rowkey_overlap_with_en_llmail"] == 0
+    with open(os.path.join(OUT, "summary.json"), encoding="utf-8") as f:
+        summary_commit = json.load(f).get("commit")
+    analysis["run_batches"] = run_batches(set(inj_meta.loc[inj_meta["is_new"], "uid"]), summary_commit)
+    analysis["run_totals"] = run_totals(analysis["run_batches"])
 
     # ---------------------------------------------------------- 1. overall + EN baseline context
     rows = []
@@ -467,7 +585,11 @@ def main():
              ("JA_llm", "EN_LL", "JA LLM-judge-evading vs EN LLMail"),
              ("EN_LL_evaded", "EN_LL_caught", "within EN LLMail"), ("JA_P1", "JA_P2", "within JA"),
              ("JA_llm", "JA_clf", "within JA: LLM judge involved vs classifiers only"),
-             ("JA_all", "EN_all", "vs all EN injections (different formats)")]
+             ("JA_all", "EN_all", "vs all EN injections (different formats)"),
+             ("JA_920", "EN_LL", "920-version headline (old 420 attacks) vs EN LLMail"),
+             ("JA_new", "EN_LL", "new 80 vs EN LLMail"),
+             ("JA_new", "JA_P1_old", "new 80 vs the 170 Phase 1 rows of the 920 version (both Phase 1)"),
+             ("JA_new", "JA_920", "new 80 vs all 420 attacks of the 920 version")]
     comp_rows = []
     for q in QS:
         for a_, b_, role in COMPS:
@@ -502,7 +624,7 @@ def main():
                                 **det(ll.loc[m, "p"])})
     en_ll_cross = save_csv(pd.DataFrame(xc_rows), "en_llmail_by_llm_judge_level.csv")
 
-    # team-cluster bootstrap (sensitivity: 145 JA teams, up to 9 submissions each)
+    # team-cluster bootstrap (sensitivity: JA comes from many teams with up to 12 submissions each)
     crng = np.random.default_rng(SEED + 1)
     team_rows = []
     ja_teams = inj_meta["team_id"].to_numpy()
@@ -527,10 +649,14 @@ def main():
     # ---------------------------------------------------------- 4. Q2 vs QL (paired, same documents)
     pq_rows = []
     PQ = {}
-    for name, key, idx in (("JA attacks (420)", "JA_all", IDX["JA_all"]), ("EN LLMail attacks (89)", "EN_LL", IDX["EN_LL"]),
-                           ("EN all injections (500)", "EN_all", IDX["EN_all"]),
-                           (f"JA classifier-only attacks ({len(G['Q2']['JA_clf'])})", "JA_clf", IDX["JA_clf"]),
-                           (f"JA LLM-judge attacks ({len(G['Q2']['JA_llm'])})", "JA_llm", IDX["JA_llm"])):
+    PQ_NAME = {"JA_all": f"JA attacks ({nI})", "EN_LL": f"EN LLMail attacks ({len(G['Q2']['EN_LL'])})",
+               "EN_all": f"EN all injections ({len(G['Q2']['EN_all'])})",
+               "JA_clf": f"JA classifier-only attacks ({len(G['Q2']['JA_clf'])})",
+               "JA_llm": f"JA LLM-judge attacks ({len(G['Q2']['JA_llm'])})",
+               "JA_920": f"JA 920-version attacks ({len(G['Q2']['JA_920'])})",
+               "JA_new": f"JA new attacks ({len(G['Q2']['JA_new'])})"}
+    for key, name in PQ_NAME.items():
+        idx = IDX[key]
         a, b = G["Q2"][key]["p"].to_numpy(), G["QL"][key]["p"].to_numpy()
         da, db = a >= THRESHOLD, b >= THRESHOLD
         q2_only, ql_only, pm = mcnemar_exact(da, db)
@@ -561,12 +687,12 @@ def main():
         pq_rows.append({"set": name, "metric": "mean_p", "n": len(a), "Q2": a.mean(), "QL": b.mean(),
                         "d_QL_minus_Q2": b.mean() - a.mean(), "d_lo": ci(bm)[0], "d_hi": ci(bm)[1],
                         "verdict": verdict(*ci(bm))})
-    # correctness on all 920 JA documents
+    # correctness on all JA documents
     y = D["Q2"]["ja"]["label_int"].to_numpy()
     c2 = (D["Q2"]["ja"]["pred"].to_numpy() == y)
     cl = (D["QL"]["ja"].set_index("uid").loc[D["Q2"]["ja"]["uid"], "pred"].to_numpy() == y)
     q2_only, ql_only, pm = mcnemar_exact(c2, cl)
-    pq_rows.append({"set": "JA all (920)", "metric": "accuracy", "n": len(y), "Q2": c2.mean(), "QL": cl.mean(),
+    pq_rows.append({"set": f"JA all ({len(y)})", "metric": "accuracy", "n": len(y), "Q2": c2.mean(), "QL": cl.mean(),
                     "d_QL_minus_Q2": cl.mean() - c2.mean(), "Q2_only": q2_only, "QL_only": ql_only, "mcnemar_p": pm})
     # does QL help more on JA than on EN LLMail? (difference in differences, independent resamples)
     did = PQ["JA_all"] - PQ["EN_LL"]
@@ -612,7 +738,7 @@ def main():
     a2, aL = G["Q2"]["JA_all"], G["QL"]["JA_all"]
     fb_tab = pd.crosstab(np.where(a2["p"] >= THRESHOLD, "Q2 탐지", "Q2 놓침"),
                          np.where(aL["p"] >= THRESHOLD, "QL 탐지", "QL 놓침"))
-    fb_tab.index.name = "JA 공격 420"
+    fb_tab.index.name = f"JA 공격 {nI}"
     fb_tab.reset_index().to_csv(os.path.join(TAB, "q2_vs_ql_crosstab_attacks.csv"), index=False, encoding="utf-8-sig")
 
     # ---------------------------------------------------------- 5. facets: technique, detector, defense, phase, ...
@@ -658,7 +784,9 @@ def main():
     by_def = save_csv(facet("defense", "defense", DEF_ORDER, DEF_KO), "by_defense.csv")
     by_phase = save_csv(facet("phase", "phase", ["Phase1", "Phase2"], {"Phase1": "Phase 1", "Phase2": "Phase 2"}),
                         "by_phase.csv")
-    by_risk = save_csv(facet("risk_level", "risk_level", [3, 4], {3: "3 (중간)", 4: "4 (높음)"}), "by_risk_level.csv")
+    by_risk_exact = facet("risk_level", "risk_level", [3, 4, 5], {3: "3 (중간)", 4: "4 (높음)", 5: "5 (매우 높음)"})
+    by_risk = facet("risk_level_merged", "risk_merged", ["3", "4–5"], {"3": "3 (중간)", "4–5": "4–5 (높음 이상)"})
+    save_csv(pd.concat([by_risk_exact, by_risk]), "by_risk_level.csv")
     by_scen = save_csv(facet("scenario", "scenario", ["scenario_1", "scenario_2", "scenario_3", "scenario_4"],
                              {f"scenario_{i}": f"시나리오 {i}" for i in range(1, 5)}), "by_scenario.csv")
     by_out = save_csv(facet("outcome", "outcome", OUTCOME_ORDER, OUTCOME_KO), "by_attack_outcome.csv")
@@ -678,8 +806,24 @@ def main():
     for q in QS:
         D[q]["inj"]["len_q"] = pd.cut(D[q]["inj"]["char_len"], qcuts, labels=len_labels, include_lowest=True).astype(str)
     by_len = save_csv(facet("length_quartile", "len_q", len_labels, {}), "by_length_quartile.csv")
-    facets_all = pd.concat([by_det, by_judge, by_def, by_phase, by_risk, by_scen, by_out, by_model, by_addr, by_ntag,
-                            by_len])
+    # trend check (the quartile-vs-rest tests above can miss a monotone trend): longest minus shortest quartile
+    # (Newcombe) and Spearman rho between length and p
+    lt_rows = []
+    for q in QS:
+        inj = D[q]["inj"]
+        hit = inj["p"].to_numpy() >= THRESHOLD
+        lo_m, hi_m = (inj["len_q"] == len_labels[0]).to_numpy(), (inj["len_q"] == len_labels[-1]).to_numpy()
+        d, dlo, dhi = newcombe(int(hit[hi_m].sum()), int(hi_m.sum()), int(hit[lo_m].sum()), int(lo_m.sum()))
+        rho, rp = spearmanr(inj["char_len"], inj["p"])
+        lt_rows.append({"question": q, "shortest": len_labels[0], "longest": len_labels[-1],
+                        "TPR_shortest": hit[lo_m].mean(), "TPR_longest": hit[hi_m].mean(), "d_longest_minus_shortest": d,
+                        "d_lo": dlo, "d_hi": dhi, "d_verdict": verdict(dlo, dhi), "spearman_rho_len_p": rho,
+                        "spearman_p": rp})
+    len_trend = save_csv(pd.DataFrame(lt_rows), "length_trend.csv")
+    by_batch = save_csv(facet("batch", "is_new", [False, True], {False: "920판 공격 420", True: "새 80"}),
+                        "by_batch.csv")
+    facets_all = pd.concat([by_det, by_judge, by_def, by_phase, by_risk_exact, by_risk, by_scen, by_out, by_model,
+                            by_addr, by_ntag, by_len, by_batch])
     save_csv(facets_all, "by_facet_all.csv")
     # tag co-occurrence (for reading the multi-label table)
     tl = [t for t in tags_order if t != "(none)"]
@@ -705,7 +849,7 @@ def main():
              "글자 수": ja_all["char_len"]}
     for k, v in feats.items():
         a = metrics(y.tolist(), v.astype(float).tolist())["AUC"]
-        feat_rows.append({"set": "JA 920", "feature": k, "AUC": a, "AUC_direction_free": max(a, 1 - a),
+        feat_rows.append({"set": JA_SET, "feature": k, "AUC": a, "AUC_direction_free": max(a, 1 - a),
                           "share_attacks": float(v[y == 1].astype(bool).mean()) if k != "글자 수" else None,
                           "share_benign": float(v[y == 0].astype(bool).mean()) if k != "글자 수" else None})
 
@@ -718,23 +862,24 @@ def main():
                                method="predict_proba")[:, 1]
         return metrics(yy.tolist(), pr.tolist())["AUC"]
 
-    feat_rows.append({"set": "JA 920", "feature": "표면 특징 5개 로지스틱 (5겹 교차검증)", "AUC": surface_cv(ja_all),
+    feat_rows.append({"set": JA_SET, "feature": "표면 특징 5개 로지스틱 (5겹 교차검증)", "AUC": surface_cv(ja_all),
                       "AUC_direction_free": None})
     feat_rows.append({"set": "EN 1000 (참고)", "feature": "표면 특징 5개 로지스틱 (5겹 교차검증)",
                       "AUC": surface_cv(en_meta), "AUC_direction_free": None})
     for q in QS:
-        feat_rows.append({"set": "JA 920", "feature": f"Jev {q}", "AUC": overall.set_index("question").loc[q, "AUC"]})
+        feat_rows.append({"set": JA_SET, "feature": f"Jev {q}", "AUC": overall.set_index("question").loc[q, "AUC"]})
     fmt_sep = save_csv(pd.DataFrame(feat_rows), "format_separability.csv")
 
     # Jev AUC against narrower benign comparison sets (format-matched)
     sub_rows = []
     ben_meta = D["Q2"]["ben"]
-    subsets = {"전체 정상 500": np.ones(nB, bool), "정상 이메일 146": (ben_meta["doc_type"] == "email").to_numpy(),
-               "LLMail 정상 메일 37": (ben_meta["source"] == "LLMail-Inject").to_numpy(),
-               "Enron 실제 메일 78": (ben_meta["source"] == "Enron").to_numpy(),
-               "이메일 아닌 정상 354": (ben_meta["doc_type"] != "email").to_numpy()}
+    sub_masks = [("all", "전체 정상", np.ones(nB, bool)), ("email", "정상 이메일", (ben_meta["doc_type"] == "email").to_numpy()),
+                 ("llmail", "LLMail 정상 메일", (ben_meta["source"] == "LLMail-Inject").to_numpy()),
+                 ("enron", "Enron 실제 메일", (ben_meta["source"] == "Enron").to_numpy()),
+                 ("nonmail", "이메일 아닌 정상", (ben_meta["doc_type"] != "email").to_numpy())]
+    subsets = {f"{lab} {int(m.sum())}": (key, m) for key, lab, m in sub_masks}
     srng = np.random.default_rng(SEED + 2)
-    for name, m in subsets.items():
+    for name, (key, m) in subsets.items():
         nb_ = int(m.sum())
         SB = srng.integers(0, nb_, (N_BOOT, nb_))
         for q in QS:
@@ -745,9 +890,10 @@ def main():
                              "AUC_lo": ci(r)[0], "AUC_hi": ci(r)[1], "fp": fp, "FPR": fp / nb_,
                              "FPR_lo": J.wilson(fp, nb_)[0], "FPR_hi": J.wilson(fp, nb_)[1],
                              "mean_p_benign": float(pB.mean())})
-            if name == "LLMail 정상 메일 37":  # EN LLMail attacks vs the same 37 (EN calls), for reference
+            if key == "llmail":  # EN LLMail attacks vs the same LLMail benign mails (EN calls), for reference
                 pE = G[q]["EN_LL"]["p"].to_numpy()
-                sub_rows.append({"question": q, "benign_set": name + " (EN LLMail 공격 89 기준, 참고)", "n_benign": nb_,
+                sub_rows.append({"question": q, "benign_set": name + f" (EN LLMail 공격 {len(pE)} 기준, 참고)",
+                                 "n_benign": nb_,
                                  "AUC": auc_metrics(pE, BENP[q]["EN"][m])})
     auc_sub = save_csv(pd.DataFrame(sub_rows), "auc_by_benign_subset.csv")
 
@@ -810,6 +956,89 @@ def main():
     save_csv(fn[fn["missed_by"] != "none"].sort_values(["missed_by", "p_QL"]), "missed_attacks.csv")
     both_missed = fn[fn["missed_by"] == "both"]
 
+    # ---------------------------------------------------------- 10. 920 -> 1000: the old headline next to the new one
+    # The 920 old rows (JA-I-001..420 + JA-B-*) are byte-identical in dataset_ja_1000 and their calls were reused, so
+    # restricting the 1000-row CSVs to them gives back the 920-version point estimates exactly. Only deterministic
+    # intervals (Wilson, Newcombe, exact McNemar) are used here; bootstrap CIs of the 920 version are in its own commit.
+    ch_rows = []
+    scopes = {"920": "JA_920", "1000": "JA_all", "new80": "JA_new"}
+    en_ll_k = {q: int((G[q]["EN_LL"]["p"] >= THRESHOLD).sum()) for q in QS}
+    nLL = len(G["Q2"]["EN_LL"])
+
+    def add(question, metric, vals, note=""):
+        r = {"question": question, "metric": metric, "note": note}
+        for sc, v in vals.items():
+            r.update({f"{k}_{sc}": x for k, x in v.items()})
+        ch_rows.append(r)
+
+    for q in QS:
+        vals_t, vals_auc, vals_d, vals_llm, vals_clf, vals_meanp = {}, {}, {}, {}, {}, {}
+        for sc, g in scopes.items():
+            df = G[q][g]
+            p = df["p"].to_numpy()
+            k, n = int((p >= THRESHOLD).sum()), len(p)
+            lo, hi = J.wilson(k, n)
+            vals_t[sc] = {"v": k / n, "lo": lo, "hi": hi, "k": k, "n": n}
+            vals_meanp[sc] = {"v": float(p.mean()), "n": n}
+            vals_auc[sc] = {"v": auc_metrics(p, BENP[q]["JA"]), "n": n}
+            d, dlo, dhi = newcombe(k, n, en_ll_k[q], nLL)
+            vals_d[sc] = {"v": d, "lo": dlo, "hi": dhi, "n": n, "verdict": verdict(dlo, dhi),
+                          "fisher_p": fisher_p(k, n, en_ll_k[q], nLL)}
+            for store, jt_ in ((vals_llm, "llm"), (vals_clf, "clf")):
+                pj = p[(df["judge_type"] == jt_).to_numpy()]
+                kj = int((pj >= THRESHOLD).sum())
+                lo_, hi_ = J.wilson(kj, len(pj))
+                store[sc] = {"v": kj / len(pj), "lo": lo_, "hi": hi_, "k": kj, "n": len(pj)}
+        add(q, "TPR", vals_t)
+        add(q, "mean_p_attack", vals_meanp)
+        add(q, "AUC (vs the same 500 benign)", vals_auc, "형식 단서로 부풀 수 있음 (format_separability.csv)")
+        add(q, "dTPR vs EN LLMail (Newcombe)", vals_d, f"EN LLMail {en_ll_k[q]}/{nLL}")
+        add(q, "TPR, LLM judge involved", vals_llm)
+        add(q, "TPR, classifiers only", vals_clf)
+        fb = BENP[q]["JA"] >= THRESHOLD
+        lo, hi = J.wilson(int(fb.sum()), len(fb))
+        same = {"v": fb.mean(), "lo": lo, "hi": hi, "k": int(fb.sum()), "n": len(fb)}
+        add(q, "FPR", {"920": same, "1000": same}, "정상 500건은 두 판에서 같은 행·같은 호출")
+    for sc, g in scopes.items():
+        for sub, lab in ((None, ""), ("llm", ", LLM judge involved"), ("clf", ", classifiers only")):
+            m2 = np.ones(len(G["Q2"][g]), bool) if sub is None else (G["Q2"][g]["judge_type"] == sub).to_numpy()
+            a, b = G["Q2"][g]["p"].to_numpy()[m2] >= THRESHOLD, G["QL"][g]["p"].to_numpy()[m2] >= THRESHOLD
+            q2o, qlo, pm = mcnemar_exact(a, b)
+            ch_rows.append({"question": "QL−Q2", "metric": f"dTPR paired ({sc}{lab})", f"v_{sc}": b.mean() - a.mean(),
+                            f"n_{sc}": len(a), f"Q2_only_{sc}": q2o, f"QL_only_{sc}": qlo, f"mcnemar_p_{sc}": pm})
+    change = pd.DataFrame(ch_rows)
+    save_csv(change, "change_920_to_1000.csv")
+    # facet conclusions that changed between the versions: the same Fisher/Newcombe/Holm tables on the 920 old rows
+    old = (~inj_meta["is_new"]).to_numpy()
+    fac_old = {"technique": facet("technique (920 rows)", "tags", tags_order, TAG_KO, multi=True, subset=old),
+               "technique_classifier_only": facet("technique, classifier-evading (920 rows)", "tags", tags_order,
+                                                  TAG_KO, multi=True, subset=old & clf_only),
+               "outcome": facet("outcome (920 rows)", "outcome", OUTCOME_ORDER, OUTCOME_KO, subset=old),
+               "scenario": facet("scenario (920 rows)", "scenario", [f"scenario_{i}" for i in range(1, 5)],
+                                 {f"scenario_{i}": f"시나리오 {i}" for i in range(1, 5)}, subset=old)}
+    fac_new = {"technique": by_tech, "technique_classifier_only": by_tech_clf, "outcome": by_out, "scenario": by_scen}
+    holm_surv = {}
+    for k in fac_old:
+        for ver, df in (("920", fac_old[k]), ("1000", fac_new[k])):
+            s_ = df[df["fisher_p_holm"] < 0.05]
+            holm_surv[f"{k}|{ver}"] = [f"{r['question']}:{r['value']} {r['d_vs_rest']:+.3f} (Holm p={r['fisher_p_holm']:.3f})"
+                                       for _, r in s_.iterrows()]
+    save_csv(pd.concat([df.assign(version="920") for df in fac_old.values()] +
+                       [df.assign(version="1000") for df in fac_new.values()]), "change_920_to_1000_facets.csv")
+    tm = inj_meta.groupby("is_new")["team_id"]
+    change_meta = {"rows_920": int((~inj_meta["is_new"]).sum()) + nB, "rows_1000": N_JA,
+                   "attacks_920": int((~inj_meta["is_new"]).sum()), "attacks_1000": nI,
+                   "phase1_920": int(((~inj_meta["is_new"]) & (inj_meta["phase"] == "Phase1")).sum()),
+                   "phase1_1000": int((inj_meta["phase"] == "Phase1").sum()),
+                   "llm_judge_920": int(((~inj_meta["is_new"]) & (inj_meta["judge_type"] == "llm")).sum()),
+                   "llm_judge_1000": int((inj_meta["judge_type"] == "llm").sum()),
+                   "teams_920": int(tm.nunique().get(False, 0)), "teams_1000": int(inj_meta["team_id"].nunique()),
+                   "max_per_team_920": int(inj_meta[~inj_meta["is_new"]]["team_id"].value_counts().max()),
+                   "max_per_team_1000": int(inj_meta["team_id"].value_counts().max()),
+                   "old_rows_p_reused": "JA-I-001..420 and JA-B-* p values are the 920-version calls (raw/ batch "
+                                        "'920_rows'); only JA-I-421..500 were called again",
+                   "holm_survivors": holm_surv}
+
     # ---------------------------------------------------------- summary.json["analysis"]
     def rec(df, keys):
         return {"|".join(str(r[k]) for k in keys): {c: r[c] for c in df.columns if c not in keys} for _, r in df.iterrows()}
@@ -829,13 +1058,17 @@ def main():
     analysis["by_judge_type"] = rec(by_judge, ["question", "value"])
     analysis["by_defense"] = rec(by_def, ["question", "value"])
     analysis["by_phase"] = rec(by_phase, ["question", "value"])
-    analysis["by_risk_level"] = rec(by_risk, ["question", "value"])
+    analysis["by_risk_level"] = rec(by_risk_exact, ["question", "value"])
+    analysis["by_risk_level_merged"] = rec(by_risk, ["question", "value"])
+    analysis["by_batch"] = rec(by_batch, ["question", "value"])
+    analysis["change_920_to_1000"] = {"meta": change_meta, **rec(change, ["question", "metric"])}
     analysis["by_scenario"] = rec(by_scen, ["question", "value"])
     analysis["by_attack_outcome"] = rec(by_out, ["question", "value"])
     analysis["by_target_model"] = rec(by_model, ["question", "value"])
     analysis["by_target_address"] = rec(by_addr, ["question", "value"])
     analysis["by_n_tags"] = rec(by_ntag, ["question", "value"])
     analysis["by_length_quartile"] = rec(by_len, ["question", "value"])
+    analysis["length_trend"] = rec(len_trend, ["question"])
     analysis["format_separability"] = rec(fmt_sep, ["set", "feature"])
     analysis["auc_by_benign_subset"] = rec(auc_sub, ["question", "benign_set"])
     analysis["thresholds_at_fpr"] = rec(thr, ["question", "target_FPR"])
@@ -845,18 +1078,24 @@ def main():
     n_addr = int(inj_meta["has_target_addr"].sum())
     n_addr_b = int(D["Q2"]["ben"]["has_target_addr"].sum())
     n_nonmail = int((D["Q2"]["ben"]["doc_type"] != "email").sum())
-    surf = float(fmt_sep[(fmt_sep["set"] == "JA 920") & fmt_sep["feature"].str.startswith("표면")]["AUC"].iloc[0])
+    surf = float(fmt_sep[(fmt_sep["set"] == JA_SET) & fmt_sep["feature"].str.startswith("표면")]["AUC"].iloc[0])
     analysis["format_note"] = {"attacks_with_target_address": n_addr, "benign_with_target_address": n_addr_b,
                                "benign_non_email": n_nonmail, "surface_logistic_cv_auc": surf}
+    nLLc = len(G["Q2"]["EN_LL"])
+    half = [(r["dTPR_newcombe_hi"] - r["dTPR_newcombe_lo"]) / 2 for _, r in comps[(comps["A"] == "JA_all") &
+                                                                                 (comps["B"] == "EN_LL")].iterrows()]
     analysis["caveats"] = [
         f"JA의 공격 {nI}건은 전부 LLMail-Inject 이메일이고 {n_addr}건({100 * n_addr / nI:.0f}%)에 contact@contact.com이 "
         f"들어 있다(대소문자 무시). 정상 {nB}건에는 이 주소가 {n_addr_b}건 나오고, {n_nonmail}건은 이메일이 아니다. 그래서 내용을 "
         f"보지 않는 표면 특징 5개만으로도 AUC {surf:.3f}가 나온다. JA의 AUC는 형식 단서로 부풀 수 있는 구조라 Jev의 "
         "실력 근거로 쓰지 않고, 공격 탐지율(TPR)과 EN LLMail 비교를 본다.",
-        "정상 500건은 EN 정상 문서와 바이트 단위로 같다. JA와 EN의 FPR 차이는 같은 문서를 따로 호출한 API 잡음이다.",
-        "EN LLMail 89건은 탐지기 우회로 고른 것은 아니지만 51건은 원래 대회에서도 탐지기를 통과했다(origin.objectives).",
-        "EN LLMail이 89건뿐이라 JA와의 탐지율 차이 CI가 넓다(폭 약 ±10–15%p). CI가 0을 포함하는 비교는 '차이 없음/오차 "
-        "범위'이고, 같다는 뜻이 아니다: 그 폭 안의 차이는 배제하지 못한다.",
+        f"정상 {nB}건은 EN 정상 문서와 바이트 단위로 같다. JA와 EN의 FPR 차이는 같은 문서를 따로 호출한 API 잡음이다.",
+        f"EN LLMail {nLLc}건은 탐지기 우회로 고른 것은 아니지만 "
+        f"{int(G['Q2']['EN_LL']['undetected'].sum())}건은 원래 대회에서도 탐지기를 통과했다(origin.objectives).",
+        f"EN LLMail이 {nLLc}건뿐이라 JA와의 탐지율 차이 CI가 넓다(반폭 약 ±{100 * min(half):.0f}–{100 * max(half):.0f}%p). "
+        "CI가 0을 포함하는 비교는 '차이 없음/오차 범위'이고, 같다는 뜻이 아니다: 그 폭 안의 차이는 배제하지 못한다.",
+        f"920 → 1000: 새로 넣은 {int(inj_meta['is_new'].sum())}건은 전부 Phase 1이다. 기존 920행의 p는 그대로 다시 썼고 새 "
+        "행만 호출했으므로, 두 판의 차이는 모두 새 행에서 나온다(change_920_to_1000.csv).",
         "기법 태그는 관찰된 특징을 붙인 다중 라벨이다. 태그끼리 함께 나오고 팀·탐지기와도 얽혀 있어, 태그별 차이를 "
         "기법의 인과 효과로 읽으면 안 된다.",
         f"JA는 {inj_meta['team_id'].nunique()}개 팀에서 왔고 한 팀이 최대 {inj_meta['team_id'].value_counts().max()}건이다. "
@@ -867,13 +1106,20 @@ def main():
     sp = os.path.join(OUT, "summary.json")
     with open(sp, encoding="utf-8") as f:
         summary = json.load(f)
-    # run_api.py rewrites summary.json (date = today, commit = current HEAD) every time it is invoked, even when it
-    # makes 0 calls. Record whether date / commit still describe the API run (first call in raw/) and warn if not.
+    # run_api.py (jevlab.write_summary) sets date = today and commit = HEAD whenever an invocation makes new calls, and
+    # keeps them when it makes none. Record whether the date still matches the API calls in raw/ and warn if not. The
+    # top-level commit describes only the last batch (new 80 rows); per-batch commits are in analysis.run_batches.
     first = {q: (summary.get(q, {}).get("run") or {}).get("first_call") for q in QS}
     run_dates = sorted({v[:10] for v in first.values() if v})
     ok = bool(run_dates) and summary.get("date") in run_dates
     analysis["run_metadata_check"] = {"summary_date": summary.get("date"), "summary_commit": summary.get("commit"),
-                                      "api_first_call_date": run_dates, "date_matches_api_run": ok}
+                                      "api_first_call_date": run_dates, "date_matches_api_run": ok,
+                                      "summary_commit_scope": "HEAD of the last run_api.py invocation that made calls "
+                                                              f"(new_80 batch, {analysis['run_batches']['Q2|new_80']['calls']}"
+                                                              f" of {analysis['run_totals']['Q2']['calls']} calls per "
+                                                              f"question); the 920_rows batch ran at {OLD_RUN_COMMIT}. "
+                                                              "See analysis.run_batches[*].commit and "
+                                                              "analysis.run_totals"}
     if not ok:
         print(f"WARNING: summary.json date {summary.get('date')} != API run date {run_dates}: run_api.py was re-invoked "
               "after the run, so date/commit no longer describe the API run (see README '다시 실행').")
@@ -887,7 +1133,11 @@ def main():
              "phase": by_phase, "scenario": by_scen, "risk": by_risk, "outcome": by_out, "model": by_model,
              "addr": by_addr, "ntag": by_ntag}, "by_len": by_len, "fmt_sep": fmt_sep, "auc_sub": auc_sub,
          "sweep": sweep, "thr": thr, "stab": stab, "BENP": BENP, "miss": miss_tab, "team": team_ci,
-         "ql_listed": ql_listed}
+         "ql_listed": ql_listed, "change": change, "change_meta": change_meta, "by_batch": by_batch,
+         "by_risk_exact": by_risk_exact, "PQ_NAME": PQ_NAME, "nI": nI, "nB": nB,
+         "profile": analysis["data_profile"], "batches": analysis["run_batches"], "totals": analysis["run_totals"],
+         "len_trend": len_trend,
+         "run_check": analysis["run_metadata_check"]}
     figs = make_figures(V)
     digest(V, inputs, figs, both_missed)
 
@@ -964,7 +1214,7 @@ def make_figures(V):
             ax.errorbar(x, v, yerr=[[v - lo], [hi - v]], fmt="o", color=Q_COLORS[q], ecolor=Q_COLORS[q],
                         elinewidth=1.6, capsize=3, ms=6.5)
             ax.text(x + 0.06, v, f"{v:.3f}", ha="left", va="center", fontsize=8.5, color=Q_COLORS[q])
-    ax.set_xticks(range(2), ["EN 1000", "JA 920\n(형식 단서로 부풀 수 있음)"])
+    ax.set_xticks(range(2), ["EN 1000", f"{JA_SET}\n(형식 단서로 부풀 수 있음)"])
     ax.set_xlim(-0.5, 1.6)
     ax.set_ylim(0.93, 1.0)
     ax.set_ylabel("AUC (축은 0.93부터)")
@@ -979,7 +1229,7 @@ def make_figures(V):
 
     # f02 key comparison: detection by group
     fig, ax = plt.subplots(figsize=(10.5, 7.4))
-    order = GROUP_ORDER[::-1]
+    order = F02_GROUPS[::-1]
     for i, g in enumerate(order):
         for q in QS:
             r = bg.loc[(q, g)]
@@ -987,7 +1237,7 @@ def make_figures(V):
             ax.text(100 * r["TPR_hi"] + 1.2, i - dodge(q, 0.17), f"{100 * r['TPR']:.1f}%", va="center", fontsize=8.5,
                     color=Q_COLORS[q])
     ax.set_yticks(range(len(order)), [f"{GROUP_KO[g]} (n={int(bg.loc[('Q2', g), 'n'])})" for g in order])
-    sep = len(GROUP_ORDER) - N_EN_GROUPS - 0.5
+    sep = len(F02_GROUPS) - N_EN_GROUPS - 0.5
     ax.axhline(sep, color=S.AXIS, lw=0.8)
     ax.text(1, sep + 0.12, "▲ EN 기준선 (탐지기 우회로 고르지 않음)", fontsize=8.5, color=S.INK_2, va="bottom", ha="left")
     ax.text(1, sep - 0.12, "▼ JA (대회 탐지기를 통과한 제출물만)", fontsize=8.5, color=S.INK_2, va="top", ha="left")
@@ -998,14 +1248,17 @@ def make_figures(V):
     c2, cl = cp.loc[("Q2", "JA_all", "EN_LL")], cp.loc[("QL", "JA_all", "EN_LL")]
     k2, kl = cp.loc[("Q2", "JA_clf", "EN_LL")], cp.loc[("QL", "JA_clf", "EN_LL")]
     both0 = all(c["dTPR_newcombe_lo"] <= 0 <= c["dTPR_newcombe_hi"] for c in (c2, cl))
+    clf0 = all(c["dTPR_newcombe_lo"] <= 0 <= c["dTPR_newcombe_hi"] for c in (k2, kl))
+    worst = max(-c["dTPR_newcombe_lo"] for c in (c2, cl))
     S.title(fig, f"JA − EN LLMail 탐지율: Q2 {pp(c2['dTPR'])}, QL {pp(cl['dTPR'])}"
                  + (" (둘 다 95% CI가 0을 포함: 차이 없음/오차 범위)" if both0 else ""),
             f"Q2 CI {pp(c2['dTPR_newcombe_lo'])}~{pp(c2['dTPR_newcombe_hi'])}, QL CI {pp(cl['dTPR_newcombe_lo'])}~"
             f"{pp(cl['dTPR_newcombe_hi'])} (Newcombe). 점 = 탐지율, 선 = Wilson 95% CI. 같은 대회·같은 메일 형식.\n"
-            f"분류기만 통과한 JA − EN LLMail도 오차 범위: Q2 {pp(k2['dTPR'])} (CI {pp(k2['dTPR_newcombe_lo'])}~"
-            f"{pp(k2['dTPR_newcombe_hi'])}), QL {pp(kl['dTPR'])} (CI {pp(kl['dTPR_newcombe_lo'])}~"
-            f"{pp(kl['dTPR_newcombe_hi'])}).\n같다는 뜻은 아니다(±10~15%p 차이는 배제 못함). "
-            f"JA 안의 낮은 탐지율은 LLM 판정기를 통과한 {int(bg.loc[('Q2', 'JA_llm'), 'n'])}건에 몰려 있다")
+            f"분류기만 통과한 JA − EN LLMail{'도 오차 범위' if clf0 else ''}: Q2 {pp(k2['dTPR'])} "
+            f"(CI {pp(k2['dTPR_newcombe_lo'])}~{pp(k2['dTPR_newcombe_hi'])}), QL {pp(kl['dTPR'])} "
+            f"(CI {pp(kl['dTPR_newcombe_lo'])}~{pp(kl['dTPR_newcombe_hi'])}).\n"
+            + (f"같다는 뜻은 아니다(최대 약 {100 * worst:.0f}%p 하락은 배제 못함). " if both0 else "")
+            + f"JA 안의 낮은 탐지율은 LLM 판정기를 통과한 {int(bg.loc[('Q2', 'JA_llm'), 'n'])}건에 몰려 있다")
     made.append(S.save(fig, "f02_ja_vs_en_llmail", out_dir=FIG))
 
     # f03 p distribution of JA attacks and benign per question
@@ -1036,8 +1289,9 @@ def make_figures(V):
     axes[0].legend(handles=[Patch(color=INJ, label=f"JA 공격 (n={len(D['Q2']['inj'])})"),
                             Patch(color=BEN, label=f"정상 (n={len(D['Q2']['ben'])})")], loc="upper right")
     mi = V["miss"].set_index("question")
-    S.title(fig, f"Q2가 놓친 공격은 p 0~0.5에 넓게 퍼져 있고(중앙값 {mi.loc['Q2', 'median_p_missed']:.2f}), "
-                 f"QL이 놓친 공격은 0.3~0.5에 더 몰린다(중앙값 {mi.loc['QL', 'median_p_missed']:.2f})",
+    s35 = {q: mi.loc[q, "missed_0.3_0.5"] / mi.loc[q, "n_missed"] for q in QS}
+    S.title(fig, f"놓친 공격의 p 중앙값은 Q2 {mi.loc['Q2', 'median_p_missed']:.2f}, QL {mi.loc['QL', 'median_p_missed']:.2f}: "
+                 f"QL이 놓친 공격의 {100 * s35['QL']:.0f}%는 0.3~0.5에 있다 (Q2는 {100 * s35['Q2']:.0f}%)",
             f"놓친 공격 중 p < 0.1: Q2 {int(mi.loc['Q2', 'missed_p_lt_0.1'])}/{int(mi.loc['Q2', 'n_missed'])}, "
             f"QL {int(mi.loc['QL', 'missed_p_lt_0.1'])}/{int(mi.loc['QL', 'n_missed'])}건. 구간 폭 0.05. "
             "정상 문서는 대부분 0~0.05 구간(막대 위 숫자, 32%에서 잘라 표시). 점선 = 임계값 0.5")
@@ -1096,9 +1350,9 @@ def make_figures(V):
     ax.set_xlabel("p, Q2 (짧은 질문)")
     ax.set_ylabel("p, QL (정의형 긴 질문)")
     ax.legend(loc="center right", bbox_to_anchor=(1.0, 0.3))
-    pq = V["paired_q"].set_index(["set", "metric"]).loc[("JA attacks (420)", "TPR")]
+    pq = V["paired_q"].set_index(["set", "metric"]).loc[(V["PQ_NAME"]["JA_all"], "TPR")]
     S.title(fig, f"QL은 Q2가 놓친 공격 중 {int(pq['QL_only'])}건을 더 잡고, Q2가 잡은 공격 중 {int(pq['Q2_only'])}건만 놓친다",
-            f"JA 920건, 같은 문서 짝 비교. QL − Q2 탐지율 {pp(pq['d_QL_minus_Q2'])} "
+            f"{JA_SET}건(공격 {V['nI']} / 정상 {V['nB']}), 같은 문서 짝 비교. 공격 탐지율 QL − Q2 {pp(pq['d_QL_minus_Q2'])} "
             f"(95% CI {pp(pq['d_lo'])}~{pp(pq['d_hi'])}, McNemar {fmt_p(pq['mcnemar_p'])})")
     made.append(S.save(fig, "f05_q2_vs_ql_paired", out_dir=FIG))
 
@@ -1136,8 +1390,8 @@ def make_figures(V):
             f"그 태그가 없는 공격 대비 차이가 Holm 보정 후 유의: {sig_txt if sig_txt else '없음'}.\n"
             f"분류기만 통과한 {int(V['by_judge'].set_index(['question', 'value']).loc[('Q2', 'clf'), 'n'])}건 안에서 "
             f"다시 보면 Holm 보정 후 남는 태그 {int((V['by_tech_clf'].fisher_p_holm < 0.05).sum())}개. "
-            "다만 표본이 줄어 검정력도 낮아진다.\n"
-            f"(태그 있음 − 없음 차이, 전체 → 분류기만: {clf_txt})")
+            "다만 표본이 줄어 검정력도 낮아진다."
+            + (f"\n(태그 있음 − 없음 차이, 전체 → 분류기만: {clf_txt})" if clf_txt else ""))
     made.append(S.save(fig, "f06_by_technique", out_dir=FIG))
 
     # f07 by detector evaded and by defense setting
@@ -1168,7 +1422,7 @@ def make_figures(V):
     axes[0].axhline(1.5, color=S.AXIS, lw=0.8)  # below: the four detectors merged into two groups
     axes[0].legend(handles=q_handles(), loc="lower left", bbox_to_anchor=(0, -0.27), ncol=2)
     jl = jt.set_index(["question", "value"])
-    S.title(fig, f"LLM 판정기를 통과한 공격은 Jev도 거의 못 잡는다: Q2 {pct(jl.loc[('Q2', 'llm'), 'TPR'], 0)}, "
+    S.title(fig, f"LLM 판정기가 들어간 방어를 통과한 공격은 Jev도 대부분 놓친다: Q2 {pct(jl.loc[('Q2', 'llm'), 'TPR'], 0)}, "
                  f"QL {pct(jl.loc[('QL', 'llm'), 'TPR'], 0)} (분류기만 통과한 공격은 {pct(jl.loc[('Q2', 'clf'), 'TPR'], 0)}, "
                  f"{pct(jl.loc[('QL', 'clf'), 'TPR'], 0)})",
             "점 = 탐지율, 선 = Wilson 95% CI, 점선 = 질문별 JA 전체. 회색 글씨·흐린 점 = n < 20. P1/P2 = 대회 Phase. "
@@ -1213,21 +1467,28 @@ def make_figures(V):
                     loc="center", fontsize=10)
     fo = F["outcome"].set_index(["question", "value"])
     inj0 = D["Q2"]["inj"]
-    r4 = inj0[inj0["risk_level"] == 4]["harm_type"].value_counts()
-    harm_ko = {"data_exfiltration": "정보 유출", "account_data_tamper": "계정 데이터 변조",
-               "unauthorized_action": "무단 행동"}
-    r4_txt = ", ".join(f"{harm_ko.get(k, k)} {v}건" for k, v in r4.items())
-    S.title(fig, f"대회에서 메일 발송까지 성공한 공격이 더 잘 잡힌다(Q2 {pct(fo.loc[('Q2', 'full'), 'TPR'], 0)}, "
-                 f"QL {pct(fo.loc[('QL', 'full'), 'TPR'], 0)}); 다른 메타데이터의 차이는 대부분 오차 범위",
-            f"JA 공격 420건. 점 = 탐지율, 선 = Wilson 95% CI, 점선 = 질문별 JA 전체. 흐린 점 = n < 20. "
-            f"위험도 4 = {r4_txt}. 시나리오 4 = 분기 이익 전망을 빼내는 목표")
+    r4 = inj0[inj0["risk_level"] >= 4]["harm_type"].value_counts()
+    r4_txt = ", ".join(f"{HARM_KO.get(k, k)} {v}건" for k, v in r4.items())
+    # which facet values survive Holm (per question, within each facet table)
+    surv = []
+    for k, df in F.items():
+        for _, r in df[(df["fisher_p_holm"] < 0.05)].iterrows():
+            surv.append(f"{r['question']} {r['value_ko']} {pp(r['d_vs_rest'], 0)}")
+    full_q = [q for q in QS if fo.loc[(q, "full"), "fisher_p_holm"] < 0.05 and fo.loc[(q, "full"), "d_vs_rest"] > 0]
+    head = (f"대회에서 메일 발송까지 성공한 공격은 {'·'.join(full_q)}에서 더 잘 잡힌다("
+            + ", ".join(f"{q} {pct(fo.loc[(q, 'full'), 'TPR'], 0)}" for q in full_q)
+            + "); 다른 메타데이터의 차이는 대부분 오차 범위" if full_q else "메타데이터별 탐지율 차이는 대부분 오차 범위")
+    S.title(fig, head,
+            f"JA 공격 {len(inj0)}건. 점 = 탐지율, 선 = Wilson 95% CI, 점선 = 질문별 JA 전체. 흐린 점 = n < 20. "
+            f"위험도 4–5 = {r4_txt}. 시나리오 4 = 분기 이익 전망을 빼내는 목표.\n"
+            f"나머지 대비 차이가 Holm 보정 후 유의(질문·묶음별): {', '.join(surv) if surv else '없음'}")
     made.append(S.save(fig, "f08_by_metadata", out_dir=FIG))
 
     # f09 format separability
     fs = V["fmt_sep"]
     fig, axes = plt.subplots(1, 2, figsize=(14, 5.8), gridspec_kw={"width_ratios": [1.1, 1]})
     ax = axes[0]
-    rows_ = fs[fs["set"] == "JA 920"].copy()
+    rows_ = fs[fs["set"] == JA_SET].copy()
     rows_["val"] = rows_["AUC_direction_free"].fillna(rows_["AUC"])
     rows_ = rows_.iloc[::-1]
     for i, (_, r) in enumerate(rows_.iterrows()):
@@ -1239,9 +1500,9 @@ def make_figures(V):
     ax.set_yticks(range(len(rows_)), [f.replace("표면 특징 5개 로지스틱 (5겹 교차검증)", "표면 특징 5개 합친 로지스틱\n(5겹 교차검증)")
                                       for f in rows_["feature"]])
     ax.axvline(0.5, color=S.INK_2, lw=0.8, ls=":")
-    en_ref = fs[fs["set"] != "JA 920"]["AUC"].iloc[0]
+    en_ref = fs[fs["set"] != JA_SET]["AUC"].iloc[0]
     ax.set_xlim(0.4, 1.05)
-    ax.set_xlabel("AUC (JA 920, 글자 수는 방향 무관 값)")
+    ax.set_xlabel(f"AUC ({JA_SET}, 글자 수는 방향 무관 값)")
     ax.set_title("내용을 안 봐도 라벨이 갈린다")
     i_len = list(rows_["feature"]).index("글자 수")
     ax.text(0.56, i_len, f"참고: 같은 표면 로지스틱을 EN 1000에\n적용하면 AUC {en_ref:.3f}", fontsize=8.5, color=S.INK_2,
@@ -1257,16 +1518,17 @@ def make_figures(V):
             ax.errorbar(r["AUC"], y, xerr=[[r["AUC"] - r["AUC_lo"]], [r["AUC_hi"] - r["AUC"]]], fmt="o",
                         color=Q_COLORS[q], ecolor=Q_COLORS[q], elinewidth=1.6, capsize=3, ms=6.5)
             ax.text(r["AUC_hi"] + 0.004, y, f"{r['AUC']:.3f}", va="center", fontsize=8.5, color=Q_COLORS[q])
-    ax.set_yticks(range(len(sets)), [f"공격 420 vs {s}" for s in sets])
+    ax.set_yticks(range(len(sets)), [f"공격 {V['nI']} vs {s}" for s in sets])
     ax.set_xlim(0.85, 1.02)
     ax.set_xlabel("Jev AUC (95% 부트스트랩 CI)")
     ax.set_title("정상 쪽을 메일로 좁혀도 Jev AUC는 높다")
     ax.grid(axis="y", visible=False)
     ax.legend(handles=q_handles(), loc="lower left")
-    sf = fs[(fs["set"] == "JA 920") & fs["feature"].str.startswith("표면")]["AUC"].iloc[0]
-    ca = fs[(fs["set"] == "JA 920") & fs["feature"].str.startswith("contact")].iloc[0]
+    sf = fs[(fs["set"] == JA_SET) & fs["feature"].str.startswith("표면")]["AUC"].iloc[0]
+    ca = fs[(fs["set"] == JA_SET) & fs["feature"].str.startswith("contact")].iloc[0]
     S.title(fig, f"JA에서는 내용을 안 보는 표면 특징만으로 AUC {sf:.3f}: 여기서 AUC는 Jev 실력의 근거가 못 된다",
-            "왼쪽: 회색 = 내용을 보지 않는 표면 규칙, 색 = Jev. 오른쪽: 공격 420건을 정상의 일부와만 비교한 Jev AUC (95% 부트스트랩 CI).\n"
+            f"왼쪽: 회색 = 내용을 보지 않는 표면 규칙, 색 = Jev. 오른쪽: 공격 {V['nI']}건을 정상의 일부와만 비교한 Jev AUC "
+            "(95% 부트스트랩 CI).\n"
             f"contact@contact.com은 공격의 {100 * ca['share_attacks']:.0f}%에 있고 정상에는 {100 * ca['share_benign']:.0f}% "
             "→ AUC보다 탐지율(TPR)과 EN LLMail 비교를 본다")
     made.append(S.save(fig, "f09_format_separability", out_dir=FIG))
@@ -1275,7 +1537,8 @@ def make_figures(V):
     sw = V["sweep"]
     fig, axes = plt.subplots(1, 3, figsize=(14, 4.9), sharex=True)
     for ax, col, ttl in zip(axes, ["TPR_JA", "TPR_EN_LL", "FPR_JA_benign"],
-                            ["JA 공격 420 탐지율", "EN LLMail 공격 89 탐지율", "정상 500 오탐률 (JA 호출)"]):
+                            [f"JA 공격 {V['nI']} 탐지율", f"EN LLMail 공격 {len(G['Q2']['EN_LL'])} 탐지율",
+                             f"정상 {V['nB']} 오탐률 (JA 호출)"]):
         for q in QS:
             s = sw[sw.question == q]
             ax.plot(s["threshold"], 100 * s[col], color=Q_COLORS[q], lw=2)
@@ -1301,7 +1564,7 @@ def make_figures(V):
 
     # f11 by length quartile
     bl = V["by_len"]
-    fig, ax = plt.subplots(figsize=(9.5, 5))
+    fig, ax = plt.subplots(figsize=(11.5, 5.4))
     vals = list(dict.fromkeys(bl[bl.question == "Q2"]["value"]))
     for i, v in enumerate(vals):
         for q in QS:
@@ -1317,12 +1580,25 @@ def make_figures(V):
     ax.set_xlabel("JA 공격 글자 수 사분위")
     ax.grid(axis="x", visible=False)
     ax.legend(handles=q_handles(), loc="lower left")
-    top_q2 = bl[(bl.question == "Q2") & (bl.value == vals[-1])].iloc[0]
-    bot_q2 = bl[(bl.question == "Q2") & (bl.value == vals[0])].iloc[0]
-    ql_rng = bl[bl.question == "QL"]["TPR"]
-    S.title(fig, f"Q2는 가장 긴 사분위에서 더 잘 잡고({pct(top_q2['TPR'], 0)} vs 가장 짧은 사분위 {pct(bot_q2['TPR'], 0)}), "
-                 f"QL은 사분위 간 차이가 오차 범위({pct(ql_rng.min(), 0)}~{pct(ql_rng.max(), 0)})",
-            "JA 공격 420건을 글자 수 사분위로 나눔. 선 = Wilson 95% CI. 관찰 결과이고 원인(긴 메일의 내용 차이 등)은 확인하지 않았다")
+    lt = V["len_trend"].set_index("question")
+
+    def len_txt(q):
+        r = lt.loc[q]
+        rng_ = f"{pct(r['TPR_shortest'], 0)} → {pct(r['TPR_longest'], 0)}"
+        if r["d_verdict"] == VERDICT_NONE:
+            return f"{q}는 길이에 따른 차이가 오차 범위({rng_})"
+        return f"{q}는 긴 메일일수록 더 잡고({rng_})" if r["d_longest_minus_shortest"] > 0 else \
+            f"{q}는 긴 메일일수록 덜 잡고({rng_})"
+    hol = {q: int((bl[bl.question == q].fisher_p_holm < 0.05).sum()) for q in QS}
+    S.title(fig, f"{len_txt('Q2')}, {len_txt('QL')}",
+            f"JA 공격 {V['nI']}건을 글자 수 사분위로 나눔(→ = 가장 짧은 사분위에서 가장 긴 사분위로). 선 = Wilson 95% CI.\n"
+            "가장 긴 − 가장 짧은 사분위(Newcombe): "
+            + ", ".join(f"{q} {pp(lt.loc[q, 'd_longest_minus_shortest'])} ({pp(lt.loc[q, 'd_lo'])}~{pp(lt.loc[q, 'd_hi'])})"
+                        for q in QS)
+            + ". Spearman(글자 수, p): " + ", ".join(f"{q} ρ = {lt.loc[q, 'spearman_rho_len_p']:.2f} "
+                                                   f"({fmt_p(lt.loc[q, 'spearman_p'])})" for q in QS)
+            + f".\n사분위 하나 대 나머지는 Holm 보정 후 남는 것 Q2 {hol['Q2']}개, QL {hol['QL']}개. "
+              "관찰 결과이고 원인(긴 메일의 내용 차이 등)은 확인하지 않았다")
     made.append(S.save(fig, "f11_by_length", out_dir=FIG))
 
     # f12 run stability
@@ -1350,7 +1626,7 @@ def make_figures(V):
     sl = st[(st.question == "QL") & (st.run == "mean of 3")].iloc[0]
     S.title(fig, "호출을 반복해도 결과는 거의 같다",
             f"0.5 기준 판정이 3회 중 바뀐 문서: Q2 {int(s2['flip_attack'] + s2['flip_benign'])}건, "
-            f"QL {int(sl['flip_attack'] + sl['flip_benign'])}건 / 920. p 표준편차 평균 Q2 {s2['p_sd_mean']:.4f}, "
+            f"QL {int(sl['flip_attack'] + sl['flip_benign'])}건 / {N_JA}. p 표준편차 평균 Q2 {s2['p_sd_mean']:.4f}, "
             f"QL {sl['p_sd_mean']:.4f}")
     made.append(S.save(fig, "f12_run_stability", out_dir=FIG))
 
@@ -1374,13 +1650,59 @@ def make_figures(V):
                             for g, (ls, lw) in styles.items()], loc="upper left")
     cp_ = V["comps"].set_index(["question", "A", "B"])
     m2, mL = cp_.loc[("Q2", "JA_all", "EN_LL")], cp_.loc[("QL", "JA_all", "EN_LL")]
-    S.title(fig, "Q2에서는 두 분포가 거의 겹치고, QL에서는 JA가 조금 낮은 쪽으로 치우친다",
+    vd = {q: m["dmean_p_verdict"] for q, m in (("Q2", m2), ("QL", mL))}
+    head13 = ("JA와 EN LLMail 공격의 평균 p 차이는 두 질문 모두 오차 범위" if all(v == VERDICT_NONE for v in vd.values())
+              else "JA와 EN LLMail 공격의 평균 p: " + ", ".join(
+                  f"{q} {'차이 없음/오차 범위' if v == VERDICT_NONE else ('JA가 낮음' if v == '낮음' else 'JA가 높음')}"
+                  for q, v in vd.items()))
+    S.title(fig, head13,
             f"평균 p 차이(JA − EN LLMail): Q2 {m2['dmean_p']:+.3f} ({m2['dmean_p_lo']:+.3f}~{m2['dmean_p_hi']:+.3f}), "
             f"QL {mL['dmean_p']:+.3f} ({mL['dmean_p_lo']:+.3f}~{mL['dmean_p_hi']:+.3f}), "
             + (f"둘 다 {VERDICT_NONE}" if m2["dmean_p_verdict"] == mL["dmean_p_verdict"] == VERDICT_NONE
                else f"Q2 {m2['dmean_p_verdict']}, QL {mL['dmean_p_verdict']}") + ".\n"
             "누적 분포: 곡선이 위에 있을수록 p가 낮다(놓치기 쉽다). 점 = 임계값 0.5에서 놓치는 비율. 색은 모두 '인젝션'")
     made.append(S.save(fig, "f13_ecdf_ja_vs_en_llmail", out_dir=FIG))
+
+    # f14 920 -> 1000: old 420 attacks, new 80 (Phase 1), all 500, the old Phase 1 rows, EN LLMail; color = question
+    rows14 = ["EN_LL", "JA_P1_old", "JA_new", "JA_920", "JA_all"]
+    fig, axes = plt.subplots(1, 2, figsize=(13.5, 5.6), sharey=True, gridspec_kw={"width_ratios": [3, 2]})
+    def sel14(df, g, llm_only):
+        if not llm_only:
+            return df
+        if g == "EN_LL":  # EN LLMail rows that got past a level whose defence included the LLM judge
+            return df[(df["llm_judge_level"] == True) & (df["undetected"] == True)]  # noqa: E712
+        return df[df["judge_type"] == "llm"]
+
+    for ax, (ttl, llm_only) in zip(axes, (("전체 탐지율", False), ("LLM 판정기 포함 공격만", True))):
+        for i, g in enumerate(rows14):
+            for q in QS:
+                p = sel14(G[q][g], g, llm_only)["p"].to_numpy()
+                k, n = int((p >= THRESHOLD).sum()), len(p)
+                lo, hi = J.wilson(k, n)
+                y = i - dodge(q, 0.17)
+                errbar(ax, y, k / n, lo, hi, Q_COLORS[q], horizontal=True, alpha=0.55 if n < 20 else 1.0)
+                ax.text(100 * hi + 1.2, y, f"{100 * k / n:.1f}% ({k}/{n})", va="center", fontsize=8.3,
+                        color=Q_COLORS[q])
+        ax.set_xlim(0, 112)
+        ax.set_xticks(range(0, 101, 20))
+        ax.set_xlabel("탐지율 TPR (%), 임계값 0.5")
+        ax.set_title(ttl)
+        ax.grid(axis="y", visible=False)
+    axes[0].set_yticks(range(len(rows14)), [GROUP_KO[g].replace(" (", "\n(") if g != "EN_LL" else
+                                            "EN LLMail 전체\n(오른쪽: LLM 판정기 레벨 통과분)" for g in rows14])
+    axes[0].axhline(0.5, color=S.AXIS, lw=0.8)
+    axes[0].legend(handles=q_handles(), loc="lower left", bbox_to_anchor=(0, -0.3), ncol=2)
+    cpn = V["comps"].set_index(["question", "A", "B"])
+    old2, old_l = cpn.loc[("Q2", "JA_920", "EN_LL")], cpn.loc[("QL", "JA_920", "EN_LL")]
+    n2, nl = cpn.loc[("Q2", "JA_new", "JA_P1_old")], cpn.loc[("QL", "JA_new", "JA_P1_old")]
+    S.title(fig, f"80건을 더한 뒤 JA 탐지율: Q2 {pct(old2['TPR_A'])} → {pct(bg.loc[('Q2', 'JA_all'), 'TPR'])}, "
+                 f"QL {pct(old_l['TPR_A'])} → {pct(bg.loc[('QL', 'JA_all'), 'TPR'])}",
+            f"새 80건(전부 Phase 1) − 920판의 Phase 1 170건: Q2 {pp(n2['dTPR'])} (CI {pp(n2['dTPR_newcombe_lo'])}~"
+            f"{pp(n2['dTPR_newcombe_hi'])}, {n2['dTPR_verdict'] or '-'}), QL {pp(nl['dTPR'])} "
+            f"(CI {pp(nl['dTPR_newcombe_lo'])}~{pp(nl['dTPR_newcombe_hi'])}, {nl['dTPR_verdict'] or '-'}), Newcombe.\n"
+            "점 = 탐지율, 선 = Wilson 95% CI, 흐린 점 = n < 20. 가로선 아래 = 비교 기준 EN LLMail. 오른쪽 EN 행 = LLM 판정기가 "
+            "들어간 레벨에서 탐지기를 통과한 EN LLMail")
+    made.append(S.save(fig, "f14_change_920_to_1000", out_dir=FIG))
     return made
 
 
@@ -1390,6 +1712,12 @@ def digest(V, inputs, figs, both_missed):
     print("== inputs md5")
     for k, v in inputs.items():
         print(f"  {k}: {v}")
+    print("== data profile")
+    print(json.dumps(clean(V["profile"]), ensure_ascii=False, indent=1))
+    print("== run batches")
+    print(json.dumps(V["batches"], ensure_ascii=False, indent=1))
+    print(json.dumps(V["totals"], ensure_ascii=False, indent=1))
+    print(json.dumps(V["run_check"], ensure_ascii=False))
     print("== overall")
     print(ov.to_string())
     print("== benign check vs EN")
@@ -1417,6 +1745,8 @@ def digest(V, inputs, figs, both_missed):
                   "fisher_p_holm", "QL_minus_Q2", "mcnemar_p_QL_vs_Q2"]].to_string())
     print("== by length")
     print(V["by_len"][["question", "value", "n", "TPR", "TPR_lo", "TPR_hi", "fisher_p_holm"]].to_string())
+    print("== length trend")
+    print(V["len_trend"].to_string())
     print("== format separability")
     print(V["fmt_sep"].to_string())
     print(V["auc_sub"].to_string())
@@ -1426,9 +1756,20 @@ def digest(V, inputs, figs, both_missed):
     print(V["stab"].to_string())
     print("== missed how close")
     print(V["miss"].to_string())
+    print("== 920 -> 1000")
+    print(json.dumps(V["change_meta"], ensure_ascii=False))
+    print(V["change"].T.to_string())
+    print("== by batch / exact risk")
+    cols = ["question", "value", "n", "tp", "TPR", "TPR_lo", "TPR_hi", "d_vs_rest", "d_lo", "d_hi", "fisher_p"]
+    print(V["by_batch"][cols].to_string())
+    print(V["by_risk_exact"][cols].to_string())
     print(f"== missed by both: {len(both_missed)}")
-    print(both_missed.sort_values("p_QL").head(8)[["uid", "p_Q2", "p_QL", "detector", "tags", "injected_instruction"]]
-          .to_string())
+    cols = ["uid", "p_Q2", "p_QL", "detector", "tags", "injected_instruction"]
+    print("  lowest p_QL (all):")
+    print(both_missed.sort_values(["p_QL", "p_Q2"]).head(8)[cols].to_string())
+    new = both_missed[both_missed["uid"].str.slice(5).astype(int) > OLD_LAST_ATTACK]
+    print(f"  lowest p_QL among the new 80 rows ({len(new)} missed by both):")
+    print(new.sort_values(["p_QL", "p_Q2"]).head(3)[cols].to_string())
     print("== figures")
     for f in figs:
         print("  ", rel(f))
