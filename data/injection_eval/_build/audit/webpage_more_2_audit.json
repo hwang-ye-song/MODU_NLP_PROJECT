@@ -1,0 +1,242 @@
+[
+ {
+  "id": "web-inj-51",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-52",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-53",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-54",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-55",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-56",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-57",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-58",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-59",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-60",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-61",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-62",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-63",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-64",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-65",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-66",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-67",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-68",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-69",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-inj-70",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "injection"
+ },
+ {
+  "id": "web-ben-51",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-52",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-53",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-54",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-55",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-56",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-57",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-58",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-59",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-60",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-61",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-62",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-63",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-64",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-65",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-66",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-67",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-68",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-69",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ },
+ {
+  "id": "web-ben-70",
+  "verdict": "ok",
+  "issue": "",
+  "suggested_label": "benign"
+ }
+]
