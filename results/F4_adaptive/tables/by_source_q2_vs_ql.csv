@@ -1,0 +1,6 @@
+﻿source,n,success_Q2,success_QL,success_Q2_only,success_QL_only,mcnemar_p,mcnemar_p_holm,verdict
+AgentDojo,8,1,0,1,0,1.0,1.0,"차이 없음 (오차 범위), 표본 작음"
+BrowseSafe-Bench,8,1,2,0,1,1.0,1.0,"차이 없음 (오차 범위), 표본 작음"
+InjecAgent,8,7,4,3,0,0.25,1.0,"차이 없음 (오차 범위), 표본 작음"
+BIPIA,8,3,2,1,0,1.0,1.0,"차이 없음 (오차 범위), 표본 작음"
+LLMail-Inject,8,1,0,1,0,1.0,1.0,"차이 없음 (오차 범위), 표본 작음"

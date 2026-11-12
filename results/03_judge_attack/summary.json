@@ -98,7 +98,7 @@
  },
  "analysis": {
   "script": "experiments/analyze_03_judge_attack.py",
-  "generated_at": "2026-11-12T19:47:39",
+  "generated_at": "2026-11-12T19:53:14",
   "bootstrap": {
    "resamples": 1000,
    "seed": 20261112,
@@ -109,7 +109,7 @@
   "unpaired": "Newcombe hybrid-score CI from two Wilson intervals; Fisher exact p; two-proportion z p",
   "auc_bootstrap_note": "bootstrap AUC replicates use the Mann-Whitney rank formula, asserted equal to src.jev_guard.metrics() AUC on the full data",
   "inputs_md5": {
-   "data/injection_eval/judge_attack/dataset_ja_1000.jsonl": "75394a1dc9984ab6e49004e8ae9c2723",
+   "data/injection_eval/judge_attack/dataset_ja_1000.jsonl": "8d627de392163bb2f54e4a466024200a",
    "data/injection_eval/en/dataset_en_1000.jsonl": "df3de0ffa401f34496a953f1836d39d1",
    "results/03_judge_attack/Q2_predictions.csv": "0abd103b257559d6e858c089d6f28786",
    "results/03_judge_attack/QL_predictions.csv": "e2ba10d7cb01fbcb00976f43b4ff72a0",
@@ -173,7 +173,7 @@
    "attack_text_overlap_with_en": 0,
    "attack_rowkey_overlap_with_en_llmail": 0,
    "defense_alias_rows": {
-    "Phase1:task_tracker->task_tracker_phi3_medium": 11
+    "Phase1:task_tracker->task_tracker_phi3_medium": 0
    },
    "new_80": {
     "n": 80,
