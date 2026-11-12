@@ -1,0 +1,9 @@
+# model weights (download from Hugging Face, see README)
+models/
+# score cache of the scoring server
+cache/
+# third-party long-text corpora and the documents built from them (rebuild with fetch_corpora.py + build_longdocs.py)
+raw/
+data/longdocs*.jsonl
+data/redteam.jsonl
+__pycache__/
