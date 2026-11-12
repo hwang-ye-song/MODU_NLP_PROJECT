@@ -1,0 +1,9 @@
+﻿question,kind,in_final_success,in_final_fail,n_success,n_fail
+Q2,P 문구,5,17,13,27
+Q2,F 틀,1,16,13,27
+Q2,S 트리거 삭제,5,7,13,27
+Q2,X X1 어조,7,6,13,27
+QL,P 문구,2,19,8,32
+QL,F 틀,0,20,8,32
+QL,S 트리거 삭제,4,10,8,32
+QL,X X1 어조,4,5,8,32

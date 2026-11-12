@@ -1,0 +1,4 @@
+﻿question,n_success,round1_pass_seen,round1_pass_same_text,round1_first_pass_query_max,round2_needed_score,no_pass_seen_in_search,successes_by_final_round
+Q2,13,8,7,37,4,1,"{""1"": 8, ""2"": 5}"
+QL,8,6,6,20,2,0,"{""1"": 6, ""2"": 2}"
+합계,21,14,13,37,6,1,

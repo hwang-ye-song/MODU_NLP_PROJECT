@@ -1,0 +1,2 @@
+﻿ASR_Q2,ASR_QL,dASR_QL_minus_Q2,dASR_lo,dASR_hi,success_Q2_only,success_QL_only,success_both,success_neither,mcnemar_p,verdict,mean_queries_Q2,mean_queries_QL,d_queries,d_queries_lo,d_queries_hi,mean_dp_Q2,mean_dp_QL,d_dp,d_dp_lo,d_dp_hi,boot_n,boot_seed
+0.325,0.2,-0.125,-0.25,0.0,6,1,7,26,0.125,차이 없음 (오차 범위),46.95,48.475,1.525,-1.575,4.575625,-0.26816666666666666,-0.2593333333333333,0.008833333333333323,-0.02967291666666669,0.04800416666666666,1000,20261112
