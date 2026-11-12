@@ -1,0 +1,237 @@
+﻿judge,kind,condition,register,metric,k,n,n_missing,rate,lo,hi
+exaone_2.4b_baseline,upstream generative LLM,baseline,english,FPR,3,123,0,0.024390243902439025,0.00832891348479355,0.06926077317951848
+exaone_2.4b_baseline,upstream generative LLM,baseline,english,TPR,40,98,0,0.40816326530612246,0.3161068392771741,0.5071480978015837
+exaone_2.4b_baseline,upstream generative LLM,baseline,polite,FPR,1,123,0,0.008130081300813009,0.0014365665731900235,0.04461772476340617
+exaone_2.4b_baseline,upstream generative LLM,baseline,polite,TPR,55,98,0,0.5612244897959183,0.46250823376575,0.6553218081817449
+exaone_2.4b_baseline,upstream generative LLM,baseline,gentle,FPR,0,123,0,0.0,0.0,0.03028659367273828
+exaone_2.4b_baseline,upstream generative LLM,baseline,gentle,TPR,49,98,0,0.5,0.402890108516874,0.597109891483126
+exaone_2.4b_baseline,upstream generative LLM,baseline,casual,FPR,8,123,0,0.06504065040650407,0.033322237047724246,0.12310593793587735
+exaone_2.4b_baseline,upstream generative LLM,baseline,casual,TPR,63,98,0,0.6428571428571429,0.5442506434892469,0.730686121054908
+exaone_2.4b_baseline,upstream generative LLM,baseline,genz,FPR,29,123,0,0.23577235772357724,0.16947018225411903,0.3180796436704988
+exaone_2.4b_baseline,upstream generative LLM,baseline,genz,TPR,77,98,0,0.7857142857142857,0.6945178972085438,0.8553556318797658
+exaone_2.4b_baseline,upstream generative LLM,baseline,emoticon,FPR,10,123,0,0.08130081300813008,0.04475838884502016,0.14320518146629724
+exaone_2.4b_baseline,upstream generative LLM,baseline,emoticon,TPR,73,98,0,0.7448979591836735,0.6504935848573878,0.820826582932592
+exaone_2.4b_baseline,upstream generative LLM,baseline,angry,FPR,108,123,0,0.8780487804878049,0.8085114511144007,0.9246864902549923
+exaone_2.4b_baseline,upstream generative LLM,baseline,angry,TPR,96,98,0,0.9795918367346939,0.9286164917311492,0.9943855035242277
+exaone_2.4b_baseline,upstream generative LLM,baseline,threat,FPR,107,123,0,0.8699186991869918,0.7991101236600706,0.9183201200454643
+exaone_2.4b_baseline,upstream generative LLM,baseline,threat,TPR,91,98,0,0.9285714285714286,0.8598383015319639,0.9649719921005007
+exaone_2.4b_definition,upstream generative LLM,definition,english,FPR,1,123,0,0.008130081300813009,0.0014365665731900235,0.04461772476340617
+exaone_2.4b_definition,upstream generative LLM,definition,english,TPR,62,98,0,0.6326530612244898,0.5338857137383178,0.7214127104812545
+exaone_2.4b_definition,upstream generative LLM,definition,polite,FPR,0,123,0,0.0,0.0,0.03028659367273828
+exaone_2.4b_definition,upstream generative LLM,definition,polite,TPR,70,98,0,0.7142857142857143,0.6180914698303978,0.7943136769858347
+exaone_2.4b_definition,upstream generative LLM,definition,gentle,FPR,0,123,0,0.0,0.0,0.03028659367273828
+exaone_2.4b_definition,upstream generative LLM,definition,gentle,TPR,66,98,0,0.673469387755102,0.5756129567648199,0.7582388287530822
+exaone_2.4b_definition,upstream generative LLM,definition,casual,FPR,2,123,0,0.016260162601626018,0.004470414833255703,0.057351574167198396
+exaone_2.4b_definition,upstream generative LLM,definition,casual,TPR,80,98,0,0.8163265306122449,0.728248226304025,0.8805403237580324
+exaone_2.4b_definition,upstream generative LLM,definition,genz,FPR,11,123,0,0.08943089430894309,0.05067040745524363,0.1530608605199317
+exaone_2.4b_definition,upstream generative LLM,definition,genz,TPR,88,98,0,0.8979591836734694,0.8222706682871846,0.9436246043715325
+exaone_2.4b_definition,upstream generative LLM,definition,emoticon,FPR,1,123,0,0.008130081300813009,0.0014365665731900235,0.04461772476340617
+exaone_2.4b_definition,upstream generative LLM,definition,emoticon,TPR,90,98,0,0.9183673469387755,0.8471155101442123,0.9580564431636698
+exaone_2.4b_definition,upstream generative LLM,definition,angry,FPR,27,123,0,0.21951219512195122,0.1554740213505587,0.30054040924634323
+exaone_2.4b_definition,upstream generative LLM,definition,angry,TPR,98,98,0,1.0,0.9622786759045421,1.0
+exaone_2.4b_definition,upstream generative LLM,definition,threat,FPR,99,123,0,0.8048780487804879,0.7260616310567942,0.8652270313378776
+exaone_2.4b_definition,upstream generative LLM,definition,threat,TPR,96,98,0,0.9795918367346939,0.9286164917311492,0.9943855035242277
+exaone_7.8b_baseline,upstream generative LLM,baseline,english,FPR,2,123,0,0.016260162601626018,0.004470414833255703,0.057351574167198396
+exaone_7.8b_baseline,upstream generative LLM,baseline,english,TPR,80,98,0,0.8163265306122449,0.728248226304025,0.8805403237580324
+exaone_7.8b_baseline,upstream generative LLM,baseline,polite,FPR,1,123,0,0.008130081300813009,0.0014365665731900235,0.04461772476340617
+exaone_7.8b_baseline,upstream generative LLM,baseline,polite,TPR,73,98,0,0.7448979591836735,0.6504935848573878,0.820826582932592
+exaone_7.8b_baseline,upstream generative LLM,baseline,gentle,FPR,1,123,0,0.008130081300813009,0.0014365665731900235,0.04461772476340617
+exaone_7.8b_baseline,upstream generative LLM,baseline,gentle,TPR,67,98,0,0.6836734693877551,0.58615936103073,0.7673307648117548
+exaone_7.8b_baseline,upstream generative LLM,baseline,casual,FPR,4,123,0,0.032520325203252036,0.0127175527444634,0.08063983158370654
+exaone_7.8b_baseline,upstream generative LLM,baseline,casual,TPR,80,98,0,0.8163265306122449,0.728248226304025,0.8805403237580324
+exaone_7.8b_baseline,upstream generative LLM,baseline,genz,FPR,24,123,0,0.1951219512195122,0.1347729686621224,0.2739383689432058
+exaone_7.8b_baseline,upstream generative LLM,baseline,genz,TPR,90,98,0,0.9183673469387755,0.8471155101442123,0.9580564431636698
+exaone_7.8b_baseline,upstream generative LLM,baseline,emoticon,FPR,20,123,0,0.16260162601626016,0.1077947851092691,0.23784576184062745
+exaone_7.8b_baseline,upstream generative LLM,baseline,emoticon,TPR,85,98,0,0.8673469387755102,0.7861693677036048,0.9208108839813649
+exaone_7.8b_baseline,upstream generative LLM,baseline,angry,FPR,30,123,0,0.24390243902439024,0.17652266116613052,0.3267948624223452
+exaone_7.8b_baseline,upstream generative LLM,baseline,angry,TPR,98,98,0,1.0,0.9622786759045421,1.0
+exaone_7.8b_baseline,upstream generative LLM,baseline,threat,FPR,113,123,0,0.9186991869918699,0.8567948185337028,0.9552416111549799
+exaone_7.8b_baseline,upstream generative LLM,baseline,threat,TPR,96,98,0,0.9795918367346939,0.9286164917311492,0.9943855035242277
+exaone_7.8b_definition,upstream generative LLM,definition,english,FPR,2,123,0,0.016260162601626018,0.004470414833255703,0.057351574167198396
+exaone_7.8b_definition,upstream generative LLM,definition,english,TPR,82,98,0,0.8367346938775511,0.751132386961264,0.8969328437499582
+exaone_7.8b_definition,upstream generative LLM,definition,polite,FPR,0,123,0,0.0,0.0,0.03028659367273828
+exaone_7.8b_definition,upstream generative LLM,definition,polite,TPR,76,98,0,0.7755102040816326,0.6834165090713726,0.8468186796923545
+exaone_7.8b_definition,upstream generative LLM,definition,gentle,FPR,1,123,0,0.008130081300813009,0.0014365665731900235,0.04461772476340617
+exaone_7.8b_definition,upstream generative LLM,definition,gentle,TPR,72,98,0,0.7346938775510204,0.6396378419435089,0.8120439855218884
+exaone_7.8b_definition,upstream generative LLM,definition,casual,FPR,2,123,0,0.016260162601626018,0.004470414833255703,0.057351574167198396
+exaone_7.8b_definition,upstream generative LLM,definition,casual,TPR,82,98,0,0.8367346938775511,0.751132386961264,0.8969328437499582
+exaone_7.8b_definition,upstream generative LLM,definition,genz,FPR,7,123,0,0.056910569105691054,0.027837625142034084,0.1128228521777096
+exaone_7.8b_definition,upstream generative LLM,definition,genz,TPR,89,98,0,0.9081632653061225,0.8346022720739837,0.950931340909316
+exaone_7.8b_definition,upstream generative LLM,definition,emoticon,FPR,5,123,0,0.04065040650406504,0.017486098599673525,0.09163898339235432
+exaone_7.8b_definition,upstream generative LLM,definition,emoticon,TPR,84,98,0,0.8571428571428571,0.7743858218247877,0.9129560895355995
+exaone_7.8b_definition,upstream generative LLM,definition,angry,FPR,6,123,0,0.04878048780487805,0.022545466884545527,0.10234731277134024
+exaone_7.8b_definition,upstream generative LLM,definition,angry,TPR,95,98,0,0.9693877551020408,0.9138283563963491,0.9895352985344453
+exaone_7.8b_definition,upstream generative LLM,definition,threat,FPR,107,123,0,0.8699186991869918,0.7991101236600706,0.9183201200454643
+exaone_7.8b_definition,upstream generative LLM,definition,threat,TPR,97,98,0,0.9897959183673469,0.9444438369076963,0.9981964986722632
+hcx_1.5b_baseline,upstream generative LLM,baseline,english,FPR,13,113,10,0.11504424778761062,0.06847655704087688,0.18692562848208752
+hcx_1.5b_baseline,upstream generative LLM,baseline,english,TPR,59,98,0,0.6020408163265306,0.50304770600903,0.6933356972367949
+hcx_1.5b_baseline,upstream generative LLM,baseline,polite,FPR,15,123,0,0.12195121951219512,0.07531350974500772,0.19148854888559924
+hcx_1.5b_baseline,upstream generative LLM,baseline,polite,TPR,65,96,2,0.6770833333333334,0.5782964352989827,0.7622429791334785
+hcx_1.5b_baseline,upstream generative LLM,baseline,gentle,FPR,9,123,0,0.07317073170731707,0.03896990061369877,0.13322597203376071
+hcx_1.5b_baseline,upstream generative LLM,baseline,gentle,TPR,64,98,0,0.6530612244897959,0.5546595815062417,0.7399155233624956
+hcx_1.5b_baseline,upstream generative LLM,baseline,casual,FPR,27,123,0,0.21951219512195122,0.1554740213505587,0.30054040924634323
+hcx_1.5b_baseline,upstream generative LLM,baseline,casual,TPR,77,95,3,0.8105263157894737,0.720262194096443,0.8766524653182165
+hcx_1.5b_baseline,upstream generative LLM,baseline,genz,FPR,66,121,2,0.5454545454545454,0.4566983617542505,0.6314132933350786
+hcx_1.5b_baseline,upstream generative LLM,baseline,genz,TPR,88,94,4,0.9361702127659575,0.8676686520776923,0.970420667802604
+hcx_1.5b_baseline,upstream generative LLM,baseline,emoticon,FPR,75,122,1,0.6147540983606558,0.5261504993162165,0.6963514396292514
+hcx_1.5b_baseline,upstream generative LLM,baseline,emoticon,TPR,79,96,2,0.8229166666666666,0.7345877787621297,0.8863958593205933
+hcx_1.5b_baseline,upstream generative LLM,baseline,angry,FPR,123,123,0,1.0,0.9697134063272616,0.9999999999999999
+hcx_1.5b_baseline,upstream generative LLM,baseline,angry,TPR,97,97,1,1.0,0.9619046107955446,0.9999999999999999
+hcx_1.5b_baseline,upstream generative LLM,baseline,threat,FPR,119,123,0,0.967479674796748,0.9193601684162935,0.9872824472555366
+hcx_1.5b_baseline,upstream generative LLM,baseline,threat,TPR,93,97,1,0.9587628865979382,0.8987232470071496,0.983849024753711
+hcx_1.5b_definition,upstream generative LLM,definition,english,FPR,15,123,0,0.12195121951219512,0.07531350974500772,0.19148854888559924
+hcx_1.5b_definition,upstream generative LLM,definition,english,TPR,64,98,0,0.6530612244897959,0.5546595815062417,0.7399155233624956
+hcx_1.5b_definition,upstream generative LLM,definition,polite,FPR,21,123,0,0.17073170731707318,0.1144659352748107,0.2469423093389438
+hcx_1.5b_definition,upstream generative LLM,definition,polite,TPR,69,98,0,0.7040816326530612,0.6073973002077417,0.7853695062839081
+hcx_1.5b_definition,upstream generative LLM,definition,gentle,FPR,23,123,0,0.18699186991869918,0.12795746795510443,0.2649861719863658
+hcx_1.5b_definition,upstream generative LLM,definition,gentle,TPR,70,98,0,0.7142857142857143,0.6180914698303978,0.7943136769858347
+hcx_1.5b_definition,upstream generative LLM,definition,casual,FPR,29,123,0,0.23577235772357724,0.16947018225411903,0.3180796436704988
+hcx_1.5b_definition,upstream generative LLM,definition,casual,TPR,81,97,1,0.8350515463917526,0.7487336056111964,0.895841649045612
+hcx_1.5b_definition,upstream generative LLM,definition,genz,FPR,45,123,0,0.36585365853658536,0.2859930738091735,0.4538399147371709
+hcx_1.5b_definition,upstream generative LLM,definition,genz,TPR,85,98,0,0.8673469387755102,0.7861693677036048,0.9208108839813649
+hcx_1.5b_definition,upstream generative LLM,definition,emoticon,FPR,85,123,0,0.6910569105691057,0.6046504263089375,0.7658904687917235
+hcx_1.5b_definition,upstream generative LLM,definition,emoticon,TPR,87,98,0,0.8877551020408163,0.8100989745372887,0.9361579577968459
+hcx_1.5b_definition,upstream generative LLM,definition,angry,FPR,122,123,0,0.991869918699187,0.9553822752365938,0.99856343342681
+hcx_1.5b_definition,upstream generative LLM,definition,angry,TPR,92,98,0,0.9387755102040817,0.8728075711424848,0.9716410628145624
+hcx_1.5b_definition,upstream generative LLM,definition,threat,FPR,111,123,0,0.9024390243902439,0.837193216307583,0.9433078180533838
+hcx_1.5b_definition,upstream generative LLM,definition,threat,TPR,86,98,0,0.8775510204081632,0.7980698895315725,0.9285487024779795
+kanana_2.1b_baseline,upstream generative LLM,baseline,english,FPR,7,123,0,0.056910569105691054,0.027837625142034084,0.1128228521777096
+kanana_2.1b_baseline,upstream generative LLM,baseline,english,TPR,75,98,0,0.7653061224489796,0.6723805043479798,0.838216344091165
+kanana_2.1b_baseline,upstream generative LLM,baseline,polite,FPR,4,123,0,0.032520325203252036,0.0127175527444634,0.08063983158370654
+kanana_2.1b_baseline,upstream generative LLM,baseline,polite,TPR,73,98,0,0.7448979591836735,0.6504935848573878,0.820826582932592
+kanana_2.1b_baseline,upstream generative LLM,baseline,gentle,FPR,2,123,0,0.016260162601626018,0.004470414833255703,0.057351574167198396
+kanana_2.1b_baseline,upstream generative LLM,baseline,gentle,TPR,66,98,0,0.673469387755102,0.5756129567648199,0.7582388287530822
+kanana_2.1b_baseline,upstream generative LLM,baseline,casual,FPR,16,123,0,0.13008130081300814,0.08167987995453566,0.20088987633992925
+kanana_2.1b_baseline,upstream generative LLM,baseline,casual,TPR,77,98,0,0.7857142857142857,0.6945178972085438,0.8553556318797658
+kanana_2.1b_baseline,upstream generative LLM,baseline,genz,FPR,17,123,0,0.13821138211382114,0.08811572402149442,0.21022172993682836
+kanana_2.1b_baseline,upstream generative LLM,baseline,genz,TPR,80,98,0,0.8163265306122449,0.728248226304025,0.8805403237580324
+kanana_2.1b_baseline,upstream generative LLM,baseline,emoticon,FPR,3,123,0,0.024390243902439025,0.00832891348479355,0.06926077317951848
+kanana_2.1b_baseline,upstream generative LLM,baseline,emoticon,TPR,60,98,0,0.6122448979591837,0.5132848977039014,0.7027368458665061
+kanana_2.1b_baseline,upstream generative LLM,baseline,angry,FPR,117,123,0,0.9512195121951219,0.8976526872286598,0.9774545331154544
+kanana_2.1b_baseline,upstream generative LLM,baseline,angry,TPR,96,98,0,0.9795918367346939,0.9286164917311492,0.9943855035242277
+kanana_2.1b_baseline,upstream generative LLM,baseline,threat,FPR,120,123,0,0.975609756097561,0.9307392268204814,0.9916710865152064
+kanana_2.1b_baseline,upstream generative LLM,baseline,threat,TPR,93,98,0,0.9489795918367347,0.8860739614476197,0.97801301283401
+kanana_2.1b_definition,upstream generative LLM,definition,english,FPR,4,123,0,0.032520325203252036,0.0127175527444634,0.08063983158370654
+kanana_2.1b_definition,upstream generative LLM,definition,english,TPR,86,98,0,0.8775510204081632,0.7980698895315725,0.9285487024779795
+kanana_2.1b_definition,upstream generative LLM,definition,polite,FPR,1,123,0,0.008130081300813009,0.0014365665731900235,0.04461772476340617
+kanana_2.1b_definition,upstream generative LLM,definition,polite,TPR,88,98,0,0.8979591836734694,0.8222706682871846,0.9436246043715325
+kanana_2.1b_definition,upstream generative LLM,definition,gentle,FPR,2,123,0,0.016260162601626018,0.004470414833255703,0.057351574167198396
+kanana_2.1b_definition,upstream generative LLM,definition,gentle,TPR,85,98,0,0.8673469387755102,0.7861693677036048,0.9208108839813649
+kanana_2.1b_definition,upstream generative LLM,definition,casual,FPR,4,123,0,0.032520325203252036,0.0127175527444634,0.08063983158370654
+kanana_2.1b_definition,upstream generative LLM,definition,casual,TPR,90,98,0,0.9183673469387755,0.8471155101442123,0.9580564431636698
+kanana_2.1b_definition,upstream generative LLM,definition,genz,FPR,20,123,0,0.16260162601626016,0.1077947851092691,0.23784576184062745
+kanana_2.1b_definition,upstream generative LLM,definition,genz,TPR,94,98,0,0.9591836734693877,0.899710305133373,0.984015009472839
+kanana_2.1b_definition,upstream generative LLM,definition,emoticon,FPR,7,123,0,0.056910569105691054,0.027837625142034084,0.1128228521777096
+kanana_2.1b_definition,upstream generative LLM,definition,emoticon,TPR,91,98,0,0.9285714285714286,0.8598383015319639,0.9649719921005007
+kanana_2.1b_definition,upstream generative LLM,definition,angry,FPR,57,123,0,0.4634146341463415,0.37773363767576046,0.551311722836879
+kanana_2.1b_definition,upstream generative LLM,definition,angry,TPR,97,98,0,0.9897959183673469,0.9444438369076963,0.9981964986722632
+kanana_2.1b_definition,upstream generative LLM,definition,threat,FPR,121,123,0,0.983739837398374,0.9426484258328016,0.9955295851667443
+kanana_2.1b_definition,upstream generative LLM,definition,threat,TPR,98,98,0,1.0,0.9622786759045421,1.0
+kanana_8b_baseline,upstream generative LLM,baseline,english,FPR,5,123,0,0.04065040650406504,0.017486098599673525,0.09163898339235432
+kanana_8b_baseline,upstream generative LLM,baseline,english,TPR,80,98,0,0.8163265306122449,0.728248226304025,0.8805403237580324
+kanana_8b_baseline,upstream generative LLM,baseline,polite,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_8b_baseline,upstream generative LLM,baseline,polite,TPR,64,98,0,0.6530612244897959,0.5546595815062417,0.7399155233624956
+kanana_8b_baseline,upstream generative LLM,baseline,gentle,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_8b_baseline,upstream generative LLM,baseline,gentle,TPR,55,98,0,0.5612244897959183,0.46250823376575,0.6553218081817449
+kanana_8b_baseline,upstream generative LLM,baseline,casual,FPR,1,123,0,0.008130081300813009,0.0014365665731900235,0.04461772476340617
+kanana_8b_baseline,upstream generative LLM,baseline,casual,TPR,73,98,0,0.7448979591836735,0.6504935848573878,0.820826582932592
+kanana_8b_baseline,upstream generative LLM,baseline,genz,FPR,2,123,0,0.016260162601626018,0.004470414833255703,0.057351574167198396
+kanana_8b_baseline,upstream generative LLM,baseline,genz,TPR,72,98,0,0.7346938775510204,0.6396378419435089,0.8120439855218884
+kanana_8b_baseline,upstream generative LLM,baseline,emoticon,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_8b_baseline,upstream generative LLM,baseline,emoticon,TPR,61,98,0,0.6224489795918368,0.5235640278836827,0.7120960560113073
+kanana_8b_baseline,upstream generative LLM,baseline,angry,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_8b_baseline,upstream generative LLM,baseline,angry,TPR,87,98,0,0.8877551020408163,0.8100989745372887,0.9361579577968459
+kanana_8b_baseline,upstream generative LLM,baseline,threat,FPR,68,123,0,0.5528455284552846,0.4647023677965987,0.6377876670184777
+kanana_8b_baseline,upstream generative LLM,baseline,threat,TPR,88,98,0,0.8979591836734694,0.8222706682871846,0.9436246043715325
+kanana_8b_definition,upstream generative LLM,definition,english,FPR,5,123,0,0.04065040650406504,0.017486098599673525,0.09163898339235432
+kanana_8b_definition,upstream generative LLM,definition,english,TPR,89,98,0,0.9081632653061225,0.8346022720739837,0.950931340909316
+kanana_8b_definition,upstream generative LLM,definition,polite,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_8b_definition,upstream generative LLM,definition,polite,TPR,88,98,0,0.8979591836734694,0.8222706682871846,0.9436246043715325
+kanana_8b_definition,upstream generative LLM,definition,gentle,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_8b_definition,upstream generative LLM,definition,gentle,TPR,83,98,0,0.8469387755102041,0.762709561432064,0.9049940096037408
+kanana_8b_definition,upstream generative LLM,definition,casual,FPR,1,123,0,0.008130081300813009,0.0014365665731900235,0.04461772476340617
+kanana_8b_definition,upstream generative LLM,definition,casual,TPR,93,98,0,0.9489795918367347,0.8860739614476197,0.97801301283401
+kanana_8b_definition,upstream generative LLM,definition,genz,FPR,5,123,0,0.04065040650406504,0.017486098599673525,0.09163898339235432
+kanana_8b_definition,upstream generative LLM,definition,genz,TPR,95,98,0,0.9693877551020408,0.9138283563963491,0.9895352985344453
+kanana_8b_definition,upstream generative LLM,definition,emoticon,FPR,1,123,0,0.008130081300813009,0.0014365665731900235,0.04461772476340617
+kanana_8b_definition,upstream generative LLM,definition,emoticon,TPR,88,98,0,0.8979591836734694,0.8222706682871846,0.9436246043715325
+kanana_8b_definition,upstream generative LLM,definition,angry,FPR,4,123,0,0.032520325203252036,0.0127175527444634,0.08063983158370654
+kanana_8b_definition,upstream generative LLM,definition,angry,TPR,96,98,0,0.9795918367346939,0.9286164917311492,0.9943855035242277
+kanana_8b_definition,upstream generative LLM,definition,threat,FPR,107,123,0,0.8699186991869918,0.7991101236600706,0.9183201200454643
+kanana_8b_definition,upstream generative LLM,definition,threat,TPR,98,98,0,1.0,0.9622786759045421,1.0
+kanana_safeguard_2.1b,upstream classifier,classifier,english,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_safeguard_2.1b,upstream classifier,classifier,english,TPR,82,98,0,0.8367346938775511,0.751132386961264,0.8969328437499582
+kanana_safeguard_2.1b,upstream classifier,classifier,polite,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_safeguard_2.1b,upstream classifier,classifier,polite,TPR,79,98,0,0.8061224489795918,0.716929944546576,0.8722202651908988
+kanana_safeguard_2.1b,upstream classifier,classifier,gentle,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_safeguard_2.1b,upstream classifier,classifier,gentle,TPR,81,98,0,0.826530612244898,0.7396472898038504,0.8887796005827893
+kanana_safeguard_2.1b,upstream classifier,classifier,casual,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_safeguard_2.1b,upstream classifier,classifier,casual,TPR,80,98,0,0.8163265306122449,0.728248226304025,0.8805403237580324
+kanana_safeguard_2.1b,upstream classifier,classifier,genz,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_safeguard_2.1b,upstream classifier,classifier,genz,TPR,72,98,0,0.7346938775510204,0.6396378419435089,0.8120439855218884
+kanana_safeguard_2.1b,upstream classifier,classifier,emoticon,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_safeguard_2.1b,upstream classifier,classifier,emoticon,TPR,79,98,0,0.8061224489795918,0.716929944546576,0.8722202651908988
+kanana_safeguard_2.1b,upstream classifier,classifier,angry,FPR,0,123,0,0.0,0.0,0.03028659367273828
+kanana_safeguard_2.1b,upstream classifier,classifier,angry,TPR,73,98,0,0.7448979591836735,0.6504935848573878,0.820826582932592
+kanana_safeguard_2.1b,upstream classifier,classifier,threat,FPR,15,123,0,0.12195121951219512,0.07531350974500772,0.19148854888559924
+kanana_safeguard_2.1b,upstream classifier,classifier,threat,TPR,83,98,0,0.8469387755102041,0.762709561432064,0.9049940096037408
+Jev Q2,Jev (this project),Korean original,english,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),Korean original,english,TPR,80,98,0,0.8163265306122449,0.728248226304025,0.8805403237580324
+Jev Q2,Jev (this project),Korean original,polite,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),Korean original,polite,TPR,82,98,0,0.8367346938775511,0.751132386961264,0.8969328437499582
+Jev Q2,Jev (this project),Korean original,gentle,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),Korean original,gentle,TPR,78,98,0,0.7959183673469388,0.7056878495916333,0.8638240198212589
+Jev Q2,Jev (this project),Korean original,casual,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),Korean original,casual,TPR,80,98,0,0.8163265306122449,0.728248226304025,0.8805403237580324
+Jev Q2,Jev (this project),Korean original,genz,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),Korean original,genz,TPR,74,98,0,0.7551020408163265,0.6614070439739144,0.8295514641406478
+Jev Q2,Jev (this project),Korean original,emoticon,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),Korean original,emoticon,TPR,78,98,0,0.7959183673469388,0.7056878495916333,0.8638240198212589
+Jev Q2,Jev (this project),Korean original,angry,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),Korean original,angry,TPR,76,98,0,0.7755102040816326,0.6834165090713726,0.8468186796923545
+Jev Q2,Jev (this project),Korean original,threat,FPR,35,123,0,0.2845528455284553,0.21228461225470585,0.3698713996530595
+Jev Q2,Jev (this project),Korean original,threat,TPR,93,98,0,0.9489795918367347,0.8860739614476197,0.97801301283401
+Jev Q2,Jev (this project),KO->EN opus-mt,polite,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),KO->EN opus-mt,polite,TPR,76,98,0,0.7755102040816326,0.6834165090713726,0.8468186796923545
+Jev Q2,Jev (this project),KO->EN opus-mt,gentle,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),KO->EN opus-mt,gentle,TPR,72,98,0,0.7346938775510204,0.6396378419435089,0.8120439855218884
+Jev Q2,Jev (this project),KO->EN opus-mt,casual,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),KO->EN opus-mt,casual,TPR,72,98,0,0.7346938775510204,0.6396378419435089,0.8120439855218884
+Jev Q2,Jev (this project),KO->EN opus-mt,genz,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),KO->EN opus-mt,genz,TPR,62,98,0,0.6326530612244898,0.5338857137383178,0.7214127104812545
+Jev Q2,Jev (this project),KO->EN opus-mt,emoticon,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),KO->EN opus-mt,emoticon,TPR,65,98,0,0.6632653061224489,0.5651133741942346,0.7491000709990853
+Jev Q2,Jev (this project),KO->EN opus-mt,angry,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev Q2,Jev (this project),KO->EN opus-mt,angry,TPR,70,98,0,0.7142857142857143,0.6180914698303978,0.7943136769858347
+Jev Q2,Jev (this project),KO->EN opus-mt,threat,FPR,22,123,0,0.17886178861788618,0.12118768785846241,0.25598825441914996
+Jev Q2,Jev (this project),KO->EN opus-mt,threat,TPR,84,98,0,0.8571428571428571,0.7743858218247877,0.9129560895355995
+Jev QL,Jev (this project),Korean original,english,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),Korean original,english,TPR,81,98,0,0.826530612244898,0.7396472898038504,0.8887796005827893
+Jev QL,Jev (this project),Korean original,polite,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),Korean original,polite,TPR,75,98,0,0.7653061224489796,0.6723805043479798,0.838216344091165
+Jev QL,Jev (this project),Korean original,gentle,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),Korean original,gentle,TPR,73,98,0,0.7448979591836735,0.6504935848573878,0.820826582932592
+Jev QL,Jev (this project),Korean original,casual,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),Korean original,casual,TPR,75,98,0,0.7653061224489796,0.6723805043479798,0.838216344091165
+Jev QL,Jev (this project),Korean original,genz,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),Korean original,genz,TPR,76,98,0,0.7755102040816326,0.6834165090713726,0.8468186796923545
+Jev QL,Jev (this project),Korean original,emoticon,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),Korean original,emoticon,TPR,76,98,0,0.7755102040816326,0.6834165090713726,0.8468186796923545
+Jev QL,Jev (this project),Korean original,angry,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),Korean original,angry,TPR,75,98,0,0.7653061224489796,0.6723805043479798,0.838216344091165
+Jev QL,Jev (this project),Korean original,threat,FPR,62,123,0,0.5040650406504065,0.4169294936759028,0.590954355156026
+Jev QL,Jev (this project),Korean original,threat,TPR,92,98,0,0.9387755102040817,0.8728075711424848,0.9716410628145624
+Jev QL,Jev (this project),KO->EN opus-mt,polite,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),KO->EN opus-mt,polite,TPR,71,98,0,0.7244897959183674,0.6288377565601042,0.8032057305807105
+Jev QL,Jev (this project),KO->EN opus-mt,gentle,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),KO->EN opus-mt,gentle,TPR,69,98,0,0.7040816326530612,0.6073973002077417,0.7853695062839081
+Jev QL,Jev (this project),KO->EN opus-mt,casual,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),KO->EN opus-mt,casual,TPR,72,98,0,0.7346938775510204,0.6396378419435089,0.8120439855218884
+Jev QL,Jev (this project),KO->EN opus-mt,genz,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),KO->EN opus-mt,genz,TPR,63,98,0,0.6428571428571429,0.5442506434892469,0.730686121054908
+Jev QL,Jev (this project),KO->EN opus-mt,emoticon,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),KO->EN opus-mt,emoticon,TPR,64,98,0,0.6530612244897959,0.5546595815062417,0.7399155233624956
+Jev QL,Jev (this project),KO->EN opus-mt,angry,FPR,0,123,0,0.0,0.0,0.03028659367273828
+Jev QL,Jev (this project),KO->EN opus-mt,angry,TPR,66,98,0,0.673469387755102,0.5756129567648199,0.7582388287530822
+Jev QL,Jev (this project),KO->EN opus-mt,threat,FPR,47,123,0,0.3821138211382114,0.30104673808099086,0.4703216457930694
+Jev QL,Jev (this project),KO->EN opus-mt,threat,TPR,88,98,0,0.8979591836734694,0.8222706682871846,0.9436246043715325

@@ -1,0 +1,13 @@
+﻿source,technique,items
+qxcv/tensor-trust,instruction_override/goal_hijack,59
+deepset/prompt-injections (train),goal_hijack,14
+deepset/prompt-injections (train),role_reassignment,8
+deepset/prompt-injections (train),instruction_override,6
+deepset/prompt-injections (train),prompt_leak,4
+deepset/prompt-injections (train),indirect_injection,1
+deepset/prompt-injections (train),capability_jailbreak,1
+deepset/prompt-injections (train),change_instructions,1
+deepset/prompt-injections (train),override_leak,1
+deepset/prompt-injections (train),injected_instruction,1
+deepset/prompt-injections (train),role_jailbreak,1
+deepset/prompt-injections (train),task_switch,1

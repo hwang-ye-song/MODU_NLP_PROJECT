@@ -1,0 +1,9 @@
+﻿register,register_ko,n_rows,n_benign,n_injection,chars_median,chars_mean,chars_max,formality,valence,lang,chars_median_benign,chars_median_injection
+english,영어 원문,221,123,98,76.0,109.48868778280543,2014,,,en,39.0,167.0
+polite,존댓말,221,123,98,43.0,58.963800904977376,1065,high,neutral,ko,30.0,80.5
+gentle,극존칭,221,123,98,48.0,66.38009049773756,1087,high,positive,ko,37.0,84.0
+casual,반말,221,123,98,32.0,47.678733031674206,1006,low,neutral,ko,21.0,60.5
+genz,젠지어,221,123,98,30.0,46.31221719457014,884,low,neutral,ko,19.0,62.0
+emoticon,이모티콘,221,123,98,41.0,55.20814479638009,957,low,positive,ko,28.0,73.5
+angry,분노체,221,123,98,48.0,63.126696832579185,966,low,negative,ko,40.0,77.0
+threat,협박체,221,123,98,42.0,60.49321266968326,1015,low,negative,ko,34.0,77.5

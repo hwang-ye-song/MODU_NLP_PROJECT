@@ -1,0 +1,166 @@
+{
+ "upstream": "https://github.com/JHC56/korean-prompt-injection-registers",
+ "commit": "d348b1fdad789222fbfe11b2176ddafad383430e",
+ "commit_date": "2026-09-26T16:51:18Z",
+ "fetched_at": "2026-11-12T09:47:12+00:00",
+ "method": "GitHub contents API (Accept: application/vnd.github.raw) at the pinned commit; bytes checked against the git blob SHA-1 of that commit",
+ "license": "BSD-2-Clause (Tensor Trust source data (c) 2023 The Regents of the University of California; Korean register translations and assembly (c) 2026 Juhyuk Choi). The 162 items derived from deepset/prompt-injections are Apache-2.0. Redistribution with the notice is allowed; LICENSE.txt and the upstream README (attribution) are kept verbatim in this folder.",
+ "files": {
+  "LICENSE.txt": {
+   "bytes": 1703,
+   "blob_sha1": "d5fc3154b510e501a1693baa48302d3cecce4ac3",
+   "md5": "f641e28fd65e50f0e96bcbf31de5ac3a",
+   "saved_as": "results/02b_korean_registers/inputs/LICENSE.txt"
+  },
+  "README.md": {
+   "bytes": 4391,
+   "blob_sha1": "5b53f8f1961003fc072c66d1bcaa39141b7b946f",
+   "md5": "5935745344d61f091bd7587cb6b94655",
+   "saved_as": "results/02b_korean_registers/inputs/UPSTREAM_README.md"
+  },
+  "data/dataset.jsonl": {
+   "bytes": 562541,
+   "blob_sha1": "e74620a75fcd0c5a5bd4e4095b2b74d0d3ce40e6",
+   "md5": "c9d27b18e5e5cddd12c877a1d779de6d",
+   "saved_as": "results/02b_korean_registers/inputs/dataset.jsonl"
+  },
+  "data/registers.json": {
+   "bytes": 1256,
+   "blob_sha1": "15c7caa549d44b00d2676e3712a046c8d061bb9c",
+   "md5": "4085b62a9fe0283647ede7ec9255eb55",
+   "saved_as": "results/02b_korean_registers/inputs/registers.json"
+  },
+  "results/exaone_2.4b_baseline.jsonl": {
+   "bytes": 1410650,
+   "blob_sha1": "0b5f324648494754a166c537be6ac3866390781d",
+   "md5": "c8e3925ea7043a55707ff810721ed8e7",
+   "rows": 1768
+  },
+  "results/exaone_2.4b_definition.jsonl": {
+   "bytes": 1455879,
+   "blob_sha1": "64a8ddef171d5d66fa607fb90fb0414022a03990",
+   "md5": "8775d7a9cc51e00d04fc04438dc41061",
+   "rows": 1768
+  },
+  "results/exaone_7.8b_baseline.jsonl": {
+   "bytes": 1196903,
+   "blob_sha1": "f43216f2abdbed8004d0796a4820c87185637e4b",
+   "md5": "d124238fd2da4099345bcc324d7abe57",
+   "rows": 1768
+  },
+  "results/exaone_7.8b_definition.jsonl": {
+   "bytes": 1277407,
+   "blob_sha1": "865730c7c392bbccc9f75ca9a213261aaa3f1efa",
+   "md5": "98e440ba98b55948ccfaf876c3489832",
+   "rows": 1768
+  },
+  "results/hcx_1.5b_baseline.jsonl": {
+   "bytes": 1279848,
+   "blob_sha1": "811f3083f9906e91cbc3c7a06c90fa5fdea0c746",
+   "md5": "372d446dbed6fcff7c2c6524e1f17de1",
+   "rows": 1768
+  },
+  "results/hcx_1.5b_definition.jsonl": {
+   "bytes": 1315615,
+   "blob_sha1": "698a048bb714fc28c2f95a1449d91829170e6b55",
+   "md5": "07f02696bc7cc25b5a9c551c7f9f7ab9",
+   "rows": 1768
+  },
+  "results/kanana_2.1b_baseline.jsonl": {
+   "bytes": 1218044,
+   "blob_sha1": "e14f8c2e4b5fbb1edad40280b307a589c9367ddf",
+   "md5": "ecb6f6724308fc0166459e695724cbde",
+   "rows": 1768
+  },
+  "results/kanana_2.1b_definition.jsonl": {
+   "bytes": 1314609,
+   "blob_sha1": "cac03ecd5ecb70c245f36dbebea167b54aafc34d",
+   "md5": "156a9dd84b71bae4be88f7af9dfcb207",
+   "rows": 1768
+  },
+  "results/kanana_8b_baseline.jsonl": {
+   "bytes": 1018628,
+   "blob_sha1": "6260b5a8a9c426981e8313df237d469ef9e3a35d",
+   "md5": "9711cb236c2b33b4683daf86e67b8b8d",
+   "rows": 1768
+  },
+  "results/kanana_8b_definition.jsonl": {
+   "bytes": 1140606,
+   "blob_sha1": "783ab96a66d28e9c1139cf90ef923918ae658474",
+   "md5": "b3770b3eff674cc2a489b2ec57c87d18",
+   "rows": 1768
+  },
+  "results/kanana_safeguard_2.1b.jsonl": {
+   "bytes": 286980,
+   "blob_sha1": "ef43f58e9016ba55246de5243053e11ff3b424b5",
+   "md5": "bb17db901bc53a87203e30091cad9a5e",
+   "rows": 1768
+  }
+ },
+ "derived": {
+  "prior_judges_preds.csv": {
+   "from": [
+    "results/exaone_2.4b_baseline.jsonl",
+    "results/exaone_2.4b_definition.jsonl",
+    "results/exaone_7.8b_baseline.jsonl",
+    "results/exaone_7.8b_definition.jsonl",
+    "results/hcx_1.5b_baseline.jsonl",
+    "results/hcx_1.5b_definition.jsonl",
+    "results/kanana_2.1b_baseline.jsonl",
+    "results/kanana_2.1b_definition.jsonl",
+    "results/kanana_8b_baseline.jsonl",
+    "results/kanana_8b_definition.jsonl",
+    "results/kanana_safeguard_2.1b.jsonl"
+   ],
+   "columns": "id, register, label, then one column per upstream run (file name without .jsonl): pred, 1 = flagged as injection, empty = upstream could not parse the answer",
+   "runs": {
+    "exaone_2.4b_baseline": {
+     "model": "exaone_2.4b",
+     "prompt_condition": "baseline"
+    },
+    "exaone_2.4b_definition": {
+     "model": "exaone_2.4b",
+     "prompt_condition": "definition"
+    },
+    "exaone_7.8b_baseline": {
+     "model": "exaone_7.8b",
+     "prompt_condition": "baseline"
+    },
+    "exaone_7.8b_definition": {
+     "model": "exaone_7.8b",
+     "prompt_condition": "definition"
+    },
+    "hcx_1.5b_baseline": {
+     "model": "hcx_1.5b",
+     "prompt_condition": "baseline"
+    },
+    "hcx_1.5b_definition": {
+     "model": "hcx_1.5b",
+     "prompt_condition": "definition"
+    },
+    "kanana_2.1b_baseline": {
+     "model": "kanana_2.1b",
+     "prompt_condition": "baseline"
+    },
+    "kanana_2.1b_definition": {
+     "model": "kanana_2.1b",
+     "prompt_condition": "definition"
+    },
+    "kanana_8b_baseline": {
+     "model": "kanana_8b",
+     "prompt_condition": "baseline"
+    },
+    "kanana_8b_definition": {
+     "model": "kanana_8b",
+     "prompt_condition": "definition"
+    },
+    "kanana_safeguard_2.1b": {
+     "model": "kanana_safeguard_2.1b",
+     "prompt_condition": "classifier"
+    }
+   },
+   "rows": 1768,
+   "md5": "59cb3a16789c913a68ef251b295a3b59"
+  }
+ }
+}
