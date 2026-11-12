@@ -34,7 +34,8 @@ TARGET = {"injection": 500, "benign": 500}
 RESERVES = {"injection": ["llmail_injection_reserve"],
             "benign": ["enron_hardneg_reserve", "enron_reserve"]}
 # judge-attack candidate files, in order, with how many non-overlapping items to keep from each
-JA_FILES = [("ja_llmail_candidates.jsonl", 250), ("ja_llmail_phase1_candidates.jsonl", 250)]
+JA_FILES = [("ja_llmail_candidates.jsonl", 250), ("ja_llmail_phase1_candidates.jsonl", 250), ("ja_llmail_phase1_more.jsonl", 0)]
+JA_TARGET = 500
 REF_PARTS = ["notinject"]  # direct user prompts -> over-defense reference set, not in main eval
 ENRON_HN_KEEP = 25
 RISK_LABEL = {0: "정상", 1: "매우 낮음", 2: "낮음", 3: "중간", 4: "높음", 5: "매우 높음"}
@@ -226,8 +227,9 @@ def main(wd: Path, sp: Path):
         if r.get("injected_instruction") and r["injected_instruction"] not in r["text"]:
             problems.append(f"EN {r['id']}: injected_instruction not in text")
     core_n = sum(r["core"] for r in en) + sum(bool(r.get("core")) for n in REF_PARTS for r in parts[n])
-    if core_n != 100:
-        problems.append(f"EN core count (main + reference) {core_n} != 100")
+    core_dropped = sum(1 for n in raw for r in raw[n] if r.get("core") and r.get("id") in ov_drop)
+    if core_n + core_dropped != 100:
+        problems.append(f"EN core count {core_n} + dropped {core_dropped} != 100")
     n_en = len(en)
     by_id = {r["id"]: r for r in en}
     write(en, wd / "en" / f"dataset_en_{n_en}")
@@ -272,7 +274,7 @@ def main(wd: Path, sp: Path):
                      risk_rationale=e["risk_rationale"], technique=None, control=None, notes=e.get("notes"))
             if r.get("injected_instruction") and r["injected_instruction"] not in r["text"]:
                 problems.append(f"KO {r['id']}: injected_instruction not in text")
-            if sum('가' <= ch <= '힣' for ch in r["text"]) == 0:
+            if sum('가' <= ch <= '힣' for ch in r["text"]) == 0 and r.get("id") not in ov.get("ko_no_hangul_ok", []):
                 problems.append(f"KO {r['id']}: no Hangul at all")
             r = finish(r)
             (ko_ref if pid in ref_by_id else out).append(r)
@@ -299,6 +301,8 @@ def main(wd: Path, sp: Path):
             if not jp.exists():
                 problems.append(f"missing {fname}")
                 continue
+            # n_keep is a cap per file; later files top up whatever the audit removed
+            n_keep = min(n_keep, JA_TARGET - len(keep)) if n_keep else JA_TARGET - len(keep)
             got = 0
             for r in apply_ov(load(jp)):
                 if got >= n_keep:
@@ -310,8 +314,8 @@ def main(wd: Path, sp: Path):
                 seen_texts.add(r["text"].strip())
                 keep.append(r)
                 got += 1
-            if got < n_keep:
-                problems.append(f"JA {fname}: only {got} non-overlapping candidates (< {n_keep})")
+        if len(keep) < JA_TARGET:
+            problems.append(f"JA: only {len(keep)} attacks after audit (< {JA_TARGET})")
         out = []
         for i, r in enumerate(keep, 1):
             r = dict(r)
