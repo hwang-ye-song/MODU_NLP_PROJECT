@@ -67,7 +67,7 @@ Jev 문서에 따르면 텍스트가 스스로 분류를 주장하면 판정이 
 - 생성 스크립트: `<SCRATCH>/scripts/x4/build_x4.py`
 
 ## 알려진 한계
-- injection base 6개(36행)는 span이 텍스트 맨 앞(offset 0)에 있다. 이 base들은 adjacent와 top의 텍스트가 같다 (notes에 표시함).
+- injection base 12개(72행: BIPIA 8개, SEP 4개)는 span이 텍스트 맨 앞(offset 0)에 있어 adjacent와 top의 텍스트가 같다. 위치 효과를 추정할 때는 이 12개를 빼야 한다 (results/X4_persuasion 분석은 이미 제외함).
 - InjecAgent(JSON 문자열)와 BrowseSafe(HTML)에서는 adjacent 문구가 JSON 값이나 HTML 속성 안에 들어간다. top 문구는 JSON/HTML 앞에 평문 줄로 붙어 구조상 어색하다.
 - base 길이 중앙값은 injection 538자, benign 368자다. 비교는 base 내 짝 비교이므로 영향이 작지만, label 간 비교에는 주의해야 한다.
 - 템플릿은 4개뿐이고 영어 평문 한 줄이다. 실제 공격처럼 정교한 변형은 다루지 않는다.
