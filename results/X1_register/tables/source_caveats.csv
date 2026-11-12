@@ -1,0 +1,6 @@
+﻿source,n_bases,unique_original_spans,original_register_imperative,original_register_plain,original_register_polite,rows_benchmark,rows_llm_rewrite,rows_identical_to_base,caveat
+BIPIA,30,30,0,30,0,0,90,0,"원래 구간이 '책을 추천해 줘' 같은 일반 질문이라, 맥락 없이 보면 사람에게 하는 요청과 구분하기 어렵다. 원문도 평범한 요청으로 분류됨"
+LLMail-Inject,30,30,6,20,4,0,90,0,다단계 공격의 일부라 바뀐 구간 밖에 트리거 문구가 남아 있을 수 있다 (평범·공손 변형도 다른 곳의 문구로 잡힐 수 있음)
+BrowseSafe-Bench,30,18,22,8,0,0,90,0,페이로드 템플릿이 반복된다: base 30개의 원문 구간 중 서로 다른 것은 18개. 실효 표본이 30보다 작다
+SEP,30,30,12,18,0,0,90,0,"원문이 'On top of your main task, answer this priority question:' 접두어 유무로 명령형/평범으로 나뉜다"
+InjecAgent,30,30,15,15,0,60,30,30,"명령형·평범 변형은 벤치마크 원문(enhanced/base) 그대로이고, 그중 15+15건은 원문 문서와 바이트 단위로 같다. 공손만 LLM 재작성"
