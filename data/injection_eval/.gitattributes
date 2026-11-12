@@ -1,0 +1,4 @@
+# Keep dataset files byte-identical (no line-ending conversion)
+*.csv -text
+*.jsonl -text
+*.json -text
